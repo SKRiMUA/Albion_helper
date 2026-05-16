@@ -1,0 +1,1656 @@
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Albion Online Helper</title>
+  <style>
+    :root {
+      --bg: #0f1419;
+      --surface: #1a222d;
+      --surface2: #243040;
+      --border: #3d4f63;
+      --text: #e8edf4;
+      --muted: #8fa3b8;
+      --gold: #c9a227;
+      --gold-dim: #8a7020;
+      --accent: #4a9eff;
+      --success: #3dd68c;
+      --danger: #f07178;
+      --radius: 10px;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: 'Segoe UI', system-ui, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      min-height: 100vh;
+      line-height: 1.5;
+    }
+    .wrap { max-width: 1200px; margin: 0 auto; padding: 20px 16px 48px; }
+    header {
+      text-align: center;
+      margin-bottom: 24px;
+      padding-bottom: 16px;
+      border-bottom: 1px solid var(--border);
+    }
+    header h1 {
+      font-size: 1.6rem;
+      font-weight: 700;
+      color: var(--gold);
+      letter-spacing: 0.02em;
+    }
+    header p { color: var(--muted); font-size: 0.9rem; margin-top: 6px; }
+    .tabs {
+      display: flex;
+      gap: 8px;
+      margin-bottom: 16px;
+      flex-wrap: wrap;
+    }
+    .tab {
+      padding: 10px 18px;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      color: var(--muted);
+      cursor: pointer;
+      font-size: 0.95rem;
+      font-weight: 500;
+      transition: 0.15s;
+    }
+    .tab:hover { color: var(--text); border-color: var(--gold-dim); }
+    .tab.active {
+      background: linear-gradient(180deg, #2a3545 0%, var(--surface) 100%);
+      color: var(--gold);
+      border-color: var(--gold);
+    }
+    .panel { display: none; }
+    .panel.active { display: block; }
+    .card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 16px;
+      margin-bottom: 16px;
+    }
+    .card h2 {
+      font-size: 0.85rem;
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+      color: var(--muted);
+      margin-bottom: 12px;
+    }
+    .row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 12px;
+      align-items: flex-end;
+    }
+    label {
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+      font-size: 0.8rem;
+      color: var(--muted);
+    }
+    input, select, button {
+      font: inherit;
+      border-radius: 6px;
+      border: 1px solid var(--border);
+      background: var(--surface2);
+      color: var(--text);
+      padding: 8px 12px;
+    }
+    input:focus, select:focus {
+      outline: none;
+      border-color: var(--accent);
+    }
+    button {
+      cursor: pointer;
+      background: linear-gradient(180deg, #3a5a8a 0%, #2d4668 100%);
+      border-color: #4a7ab8;
+      font-weight: 600;
+    }
+    button:hover { filter: brightness(1.1); }
+    button.primary {
+      background: linear-gradient(180deg, var(--gold) 0%, var(--gold-dim) 100%);
+      color: #1a1408;
+      border-color: var(--gold);
+    }
+    button.ghost {
+      background: transparent;
+      border-color: var(--border);
+      color: var(--muted);
+    }
+    .search-wrap { position: relative; flex: 1; min-width: 220px; }
+    .search-wrap input { width: 100%; }
+    .suggestions {
+      position: absolute;
+      top: 100%;
+      left: 0;
+      right: 0;
+      z-index: 50;
+      max-height: 280px;
+      overflow-y: auto;
+      background: var(--surface2);
+      border: 1px solid var(--border);
+      border-radius: 0 0 8px 8px;
+      display: none;
+    }
+    .suggestions.open { display: block; }
+    .suggestions div {
+      padding: 8px 12px;
+      cursor: pointer;
+      font-size: 0.9rem;
+      border-bottom: 1px solid var(--border);
+    }
+    .suggestions div:hover,
+    .suggestions div.focus { background: #2f3f52; }
+    .suggestions small { color: var(--muted); margin-left: 8px; font-size: 0.75rem; }
+    .chips {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px;
+      margin-top: 8px;
+    }
+    .chip {
+      padding: 4px 10px;
+      background: var(--surface2);
+      border: 1px solid var(--border);
+      border-radius: 999px;
+      font-size: 0.8rem;
+      cursor: pointer;
+    }
+    .chip:hover { border-color: var(--gold); color: var(--gold); }
+    .item-header {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      margin-bottom: 16px;
+    }
+    .item-header img {
+      width: 72px;
+      height: 72px;
+      background: #0a0e12;
+      border-radius: 8px;
+      border: 1px solid var(--border);
+    }
+    .item-header .name { font-size: 1.2rem; font-weight: 600; }
+    .item-header .id { font-size: 0.8rem; color: var(--muted); font-family: monospace; }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 0.9rem;
+    }
+    th, td {
+      padding: 10px 12px;
+      text-align: left;
+      border-bottom: 1px solid var(--border);
+    }
+    th { color: var(--muted); font-weight: 600; font-size: 0.75rem; text-transform: uppercase; }
+    tr:hover td { background: rgba(255,255,255,0.03); }
+    .num { font-variant-numeric: tabular-nums; text-align: right; }
+    .best-buy { color: var(--success); }
+    .best-sell { color: var(--accent); }
+    .arb-box {
+      margin-top: 12px;
+      padding: 12px;
+      background: var(--surface2);
+      border-radius: 8px;
+      border-left: 3px solid var(--gold);
+    }
+    .arb-box strong { color: var(--gold); }
+    .profit-pos { color: var(--success); }
+    .profit-neg { color: var(--danger); }
+    .status { font-size: 0.85rem; color: var(--muted); margin-top: 8px; }
+    .status.err { color: var(--danger); }
+    .craft-rows { display: flex; flex-direction: column; gap: 8px; }
+    .craft-row {
+      display: grid;
+      grid-template-columns: 1fr 120px 36px;
+      gap: 8px;
+      align-items: center;
+    }
+    .craft-row input[type="text"] { width: 100%; }
+    .craft-summary {
+      margin-top: 16px;
+      padding: 14px;
+      background: var(--surface2);
+      border-radius: 8px;
+      font-size: 1.05rem;
+    }
+    .checkboxes {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px 16px;
+    }
+    .checkboxes label {
+      flex-direction: row;
+      align-items: center;
+      gap: 6px;
+      color: var(--text);
+      font-size: 0.85rem;
+    }
+    .checkboxes input { width: auto; padding: 0; }
+    .tabs { overflow-x: auto; flex-wrap: nowrap; padding-bottom: 4px; }
+    .tab { white-space: nowrap; font-size: 0.85rem; padding: 8px 14px; flex-shrink: 0; }
+    .stat-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+      gap: 12px;
+      margin-bottom: 16px;
+    }
+    .stat-box {
+      background: var(--surface2);
+      border-radius: 8px;
+      padding: 14px;
+      text-align: center;
+      border: 1px solid var(--border);
+    }
+    .stat-box .val { font-size: 1.4rem; font-weight: 700; color: var(--gold); }
+    .stat-box .lbl { font-size: 0.75rem; color: var(--muted); margin-top: 4px; }
+    .build-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 12px; }
+    .build-card {
+      background: var(--surface2);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 14px;
+      cursor: pointer;
+      transition: 0.15s;
+    }
+    .build-card:hover, .build-card.active { border-color: var(--gold); }
+    .build-card .tag {
+      display: inline-block;
+      font-size: 0.7rem;
+      padding: 2px 8px;
+      border-radius: 4px;
+      background: #2a3a50;
+      color: var(--accent);
+      margin-bottom: 6px;
+    }
+    .build-card .tag.pvp { color: #f07178; }
+    .build-card .tag.hce { color: #a78bfa; }
+    .build-card .tag.hg { color: #f59e0b; }
+    .build-card .tag.corrupted { color: #f472b6; }
+    .build-card .tag.gank { color: #ef4444; }
+    .build-card .tag.gather { color: #3dd68c; }
+    .build-card .tag.avalon { color: #4a9eff; }
+    .build-card h3 { font-size: 1rem; margin-bottom: 4px; }
+    .build-detail { margin-top: 12px; }
+    .build-detail dl { display: grid; grid-template-columns: 100px 1fr; gap: 6px 12px; font-size: 0.88rem; }
+    .build-detail dt { color: var(--muted); }
+    .timer-ready { color: var(--success); font-weight: 600; }
+    .timer-wait { color: var(--warning); }
+    .timer-overdue { color: var(--danger); font-weight: 600; }
+    .inline-form {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+      gap: 10px;
+      align-items: end;
+    }
+    .spec-bar {
+      height: 6px;
+      background: var(--surface2);
+      border-radius: 3px;
+      overflow: hidden;
+      margin-top: 4px;
+    }
+    .spec-bar i { display: block; height: 100%; background: linear-gradient(90deg, var(--gold-dim), var(--gold)); }
+    textarea {
+      font: inherit;
+      border-radius: 6px;
+      border: 1px solid var(--border);
+      background: var(--surface2);
+      color: var(--text);
+      padding: 8px 12px;
+      width: 100%;
+      min-height: 80px;
+      resize: vertical;
+    }
+    .hint { font-size: 0.82rem; color: var(--muted); margin-bottom: 10px; }
+    @media (max-width: 600px) {
+      .craft-row { grid-template-columns: 1fr 80px 32px; }
+      .market-table th:nth-child(n+4), .market-table td:nth-child(n+4) { display: none; }
+    }
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <header>
+      <h1>⚔ Albion Online Helper</h1>
+      <p>Ринок · фарм · збірки · острів · рефайн · спеки · дані з Albion Data API</p>
+    </header>
+
+    <div class="tabs">
+      <button type="button" class="tab active" data-tab="market">Ринок</button>
+      <button type="button" class="tab" data-tab="craft">Крафт</button>
+      <button type="button" class="tab" data-tab="farm">Фарм</button>
+      <button type="button" class="tab" data-tab="builds">Збірки</button>
+      <button type="button" class="tab" data-tab="island">Острів</button>
+      <button type="button" class="tab" data-tab="refine">Рефайн</button>
+      <button type="button" class="tab" data-tab="fame">Спеки</button>
+    </div>
+
+    <!-- MARKET -->
+    <section id="panel-market" class="panel active">
+      <div class="card">
+        <h2>Налаштування</h2>
+        <div class="row">
+          <label>
+            Сервер
+            <select id="region">
+              <option value="europe">Європа</option>
+              <option value="americas">Америка</option>
+              <option value="asia">Азія</option>
+            </select>
+          </label>
+          <label>
+            Якість
+            <select id="quality">
+              <option value="1">Звичайна</option>
+              <option value="2">Гарна</option>
+              <option value="3">Видатна</option>
+              <option value="4">Чудова</option>
+              <option value="5">Шедевр</option>
+            </select>
+          </label>
+          <label style="flex-direction:row;align-items:center;gap:8px;margin-top:20px">
+            <input type="checkbox" id="premium" checked>
+            <span>Premium (−податки)</span>
+          </label>
+        </div>
+        <div class="checkboxes" style="margin-top:12px" id="cityChecks"></div>
+      </div>
+
+      <div class="card">
+        <h2>Предмет</h2>
+        <div class="row">
+          <label class="search-wrap">
+            Пошук (назва або ID)
+            <input type="text" id="search" placeholder="Наприклад: Adept's Bow, T4_2H_BOW" autocomplete="off">
+            <div class="suggestions" id="suggestions"></div>
+          </label>
+          <button type="button" class="primary" id="btnLoad">Завантажити ціни</button>
+        </div>
+        <div class="chips" id="favorites"></div>
+        <p class="status" id="catalogStatus">Завантаження каталогу предметів…</p>
+      </div>
+
+      <div class="card" id="resultsCard" style="display:none">
+        <div class="item-header">
+          <img id="itemIcon" src="" alt="">
+          <div>
+            <div class="name" id="itemName">—</div>
+            <div class="id" id="itemId">—</div>
+          </div>
+          <button type="button" class="ghost" id="btnFav" style="margin-left:auto">☆ У обране</button>
+        </div>
+        <div style="overflow-x:auto">
+          <table class="market-table">
+            <thead>
+              <tr>
+                <th>Місто</th>
+                <th class="num">Купити (мін.)</th>
+                <th class="num">Продати (макс.)</th>
+                <th class="num">Спред</th>
+                <th class="num">Оновлено</th>
+              </tr>
+            </thead>
+            <tbody id="priceBody"></tbody>
+          </table>
+        </div>
+        <div class="arb-box" id="arbBox"></div>
+      </div>
+    </section>
+
+    <!-- CRAFT -->
+    <section id="panel-craft" class="panel">
+      <div class="card">
+        <h2>Калькулятор крафту</h2>
+        <p style="color:var(--muted);font-size:0.9rem;margin-bottom:12px">
+          Вкажіть матеріали (витрати) і готовий предмет (дохід). Ціни підтягуються з ринку для обраного міста.
+        </p>
+        <div class="row" style="margin-bottom:16px">
+          <label>
+            Місто закупівлі / продажу
+            <select id="craftCity">
+              <option>Caerleon</option>
+              <option>Martlock</option>
+              <option>Thetford</option>
+              <option>Fort Sterling</option>
+              <option>Lymhurst</option>
+              <option>Bridgewatch</option>
+              <option>Brecilien</option>
+            </select>
+          </label>
+          <label>
+            Якість
+            <select id="craftQuality">
+              <option value="1">Звичайна</option>
+              <option value="2">Гарна</option>
+              <option value="3">Видатна</option>
+              <option value="4">Чудова</option>
+              <option value="5">Шедевр</option>
+            </select>
+          </label>
+          <button type="button" class="primary" id="btnCraftCalc">Розрахувати</button>
+        </div>
+
+        <p style="font-size:0.8rem;color:var(--muted);margin-bottom:8px">Матеріали (що купуєте)</p>
+        <div class="craft-rows" id="materialRows"></div>
+        <button type="button" class="ghost" id="btnAddMat" style="margin-top:8px">+ Матеріал</button>
+
+        <p style="font-size:0.8rem;color:var(--muted);margin:16px 0 8px">Результат (що продаєте)</p>
+        <div class="craft-rows" id="productRows"></div>
+        <button type="button" class="ghost" id="btnAddProd" style="margin-top:8px">+ Продукт</button>
+
+        <div class="craft-summary" id="craftSummary">
+          Додайте рядки та натисніть «Розрахувати».
+        </div>
+        <p class="status" id="craftStatus"></p>
+      </div>
+    </section>
+
+    <!-- FARM -->
+    <section id="panel-farm" class="panel">
+      <div class="card">
+        <h2>Срібло за годину</h2>
+        <p class="hint">Записуйте сесії фарму: данж, рибалка, збір, фліп, HCE. Усе зберігається локально в браузері.</p>
+        <div class="inline-form">
+          <label>Активність <input type="text" id="farmActivity" placeholder="Напр. Corrupted, T6 fiber"></label>
+          <label>Срібло <input type="number" id="farmSilver" min="0" placeholder="1500000"></label>
+          <label>Хвилин <input type="number" id="farmMinutes" min="1" value="60"></label>
+          <button type="button" class="primary" id="btnFarmAdd">Додати сесію</button>
+        </div>
+        <div class="stat-grid" id="farmStats" style="margin-top:16px"></div>
+        <div style="overflow-x:auto;margin-top:12px">
+          <table>
+            <thead><tr><th>Час</th><th>Активність</th><th class="num">Срібло</th><th class="num">Хв</th><th class="num">/год</th><th></th></tr></thead>
+            <tbody id="farmBody"></tbody>
+          </table>
+        </div>
+        <button type="button" class="ghost" id="btnFarmClear" style="margin-top:10px">Очистити історію</button>
+      </div>
+    </section>
+
+    <!-- BUILDS -->
+    <section id="panel-builds" class="panel">
+      <div class="card">
+        <h2>Збірки за активностями</h2>
+        <p class="hint">Мета з <a href="https://albiononlinegrind.com/builds" target="_blank" rel="noopener" style="color:var(--accent)">Albion Online Grind</a> · файл <code>albion-builds.json</code> поруч із HTML · killboard через проксі. Якщо помилка — запустіть <code>update-albion-builds.ps1</code>.</p>
+        <div class="row" style="margin-bottom:12px;align-items:center">
+          <label>Активність
+          <select id="buildFilter">
+            <option value="all">Усі</option>
+            <option value="ZvZ">ZvZ</option>
+            <option value="PvP">PvP / малі групи</option>
+            <option value="PvE">PvE / данжі</option>
+            <option value="HCE">HCE</option>
+            <option value="HG">Hellgate</option>
+            <option value="Corrupted">Corrupted</option>
+            <option value="Gank">Ганк</option>
+            <option value="Gather">Збір ресурсів</option>
+            <option value="Avalon">Avalonian Roads</option>
+            <option value="custom">Мої</option>
+          </select>
+          </label>
+          <button type="button" class="primary" id="btnBuildsRefresh">Оновити мету</button>
+        </div>
+        <p class="status" id="buildsStatus">Завантаження актуальних збірок…</p>
+        <div class="build-grid" id="buildGrid"></div>
+        <div class="build-detail card" id="buildDetail" style="display:none;margin-top:12px"></div>
+      </div>
+      <div class="card">
+        <h2>Жива мета — killboard</h2>
+        <p class="hint">Топ зброї переможців останніх боїв (офіційний API Albion). IP ≥ мінімум.</p>
+        <div class="row">
+          <label>Мін. IP <input type="number" id="kbMinIp" min="800" max="1800" value="1100" step="50"></label>
+          <label>Боїв <input type="number" id="kbLimit" min="20" max="100" value="60"></label>
+          <button type="button" class="primary" id="btnKillboard">Оновити killboard</button>
+        </div>
+        <p class="status" id="killboardStatus"></p>
+        <div id="killboardMeta" style="margin-top:12px"></div>
+      </div>
+      <div class="card">
+        <h2>Зберегти свою збірку</h2>
+        <div class="inline-form">
+          <label>Назва <input type="text" id="customBuildName" placeholder="Мій билд"></label>
+          <label>Тип
+            <select id="customBuildTag">
+              <option>ZvZ</option><option>PvP</option><option>PvE</option><option>HCE</option>
+              <option>HG</option><option>Corrupted</option><option>Gank</option><option>Gather</option><option>Avalon</option>
+            </select>
+          </label>
+        </div>
+        <label style="margin-top:10px">Опис екіпірування та навичок
+          <textarea id="customBuildText" placeholder="Голова: ...&#10;Броня: ...&#10;Зброя: ..."></textarea>
+        </label>
+        <button type="button" class="primary" id="btnSaveBuild" style="margin-top:10px">Зберегти</button>
+      </div>
+    </section>
+
+    <!-- ISLAND -->
+    <section id="panel-island" class="panel">
+      <div class="card">
+        <h2>Трекер острова</h2>
+        <p class="hint">Грядки, тварини, найманці. Вкажіть час посадки/відправки — покаже коли збирати.</p>
+        <div class="inline-form">
+          <label>Тип
+            <select id="islandType">
+              <option value="crop">Грядка (22 год)</option>
+              <option value="animal">Тварина (22 год)</option>
+              <option value="laborer">Найманець (22 год)</option>
+              <option value="custom">Своє (год)</option>
+            </select>
+          </label>
+          <label id="islandPresetLabel">Культура
+            <select id="islandPreset"></select>
+          </label>
+          <label>Назва <input type="text" id="islandName" placeholder="Грядка 1"></label>
+          <label id="islandHoursLabel" style="display:none">Годин <input type="number" id="islandHours" min="1" value="22"></label>
+          <label>Початок <input type="datetime-local" id="islandStart"></label>
+          <button type="button" class="primary" id="btnIslandAdd">Додати</button>
+        </div>
+        <div style="overflow-x:auto;margin-top:16px">
+          <table>
+            <thead><tr><th>Назва</th><th>Тип</th><th>Готово о</th><th>Статус</th><th></th></tr></thead>
+            <tbody id="islandBody"></tbody>
+          </table>
+        </div>
+      </div>
+    </section>
+
+    <!-- REFINE -->
+    <section id="panel-refine" class="panel">
+      <div class="card">
+        <h2>Калькулятор рефайну</h2>
+        <p class="hint">Руда → злитки, дерево → дошки тощо. Ціни з ринку, повернення матеріалів з урахуванням тіру та спеків.</p>
+        <div class="row">
+          <label>Матеріал
+            <select id="refineType">
+              <option value="ore">Руда → злитки</option>
+              <option value="hide">Шкура → шкіра</option>
+              <option value="fiber">Волокно → тканина</option>
+              <option value="wood">Дерево → дошки</option>
+              <option value="rock">Камінь → блоки</option>
+            </select>
+          </label>
+          <label>Тір
+            <select id="refineTier">
+              <option value="4">T4</option><option value="5">T5</option><option value="6">T6</option>
+              <option value="7">T7</option><option value="8">T8</option>
+            </select>
+          </label>
+          <label>Місто <select id="refineCity"><option>Caerleon</option><option>Thetford</option><option>Fort Sterling</option><option>Lymhurst</option><option>Bridgewatch</option><option>Martlock</option></select></label>
+          <label>Кількість сировини <input type="number" id="refineAmount" min="1" value="1000"></label>
+        </div>
+        <div class="row" style="margin-top:10px">
+          <label>Рівень спеки (0–100) <input type="number" id="refineSpec" min="0" max="100" value="0"></label>
+          <label style="flex-direction:row;align-items:center;gap:8px;margin-top:20px"><input type="checkbox" id="refineFocus"> Фокус (+40% до повернення)</label>
+          <label style="flex-direction:row;align-items:center;gap:8px;margin-top:20px"><input type="checkbox" id="refineCityBonus" checked> Бонус міста (+18%)</label>
+          <button type="button" class="primary" id="btnRefineCalc">Розрахувати</button>
+        </div>
+        <div class="craft-summary" id="refineSummary">Оберіть параметри та натисніть «Розрахувати».</div>
+        <p class="status" id="refineStatus"></p>
+      </div>
+    </section>
+
+    <!-- FAME -->
+    <section id="panel-fame" class="panel">
+      <div class="card">
+        <h2>Таблиця фейму / спеків</h2>
+        <p class="hint">Вкажіть рівень і фейм у поточному рівні — покаже скільки залишилось до 100. Дані зберігаються локально.</p>
+        <div class="inline-form" style="margin-bottom:12px">
+          <label>Категорія
+            <select id="specCategory">
+              <option value="combat">Бій (зброя / броня)</option>
+              <option value="gather">Збір</option>
+              <option value="craft">Крафт / рефайн</option>
+            </select>
+          </label>
+          <label>Назва спеки <input type="text" id="specName" placeholder="Напр. Лук, Руда, Кравецтво"></label>
+          <label>Рівень <input type="number" id="specLevel" min="0" max="100" value="0"></label>
+          <label>Фейм у рівні <input type="number" id="specFame" min="0" value="0"></label>
+          <button type="button" class="primary" id="btnSpecAdd">Додати / оновити</button>
+        </div>
+        <div style="overflow-x:auto">
+          <table>
+            <thead><tr><th>Спека</th><th>Кат.</th><th class="num">Рів.</th><th class="num">Фейм до 100</th><th>Прогрес</th><th></th></tr></thead>
+            <tbody id="specBody"></tbody>
+          </table>
+        </div>
+        <button type="button" class="ghost" id="btnSpecReset" style="margin-top:10px">Скинути всі спеки</button>
+      </div>
+    </section>
+  </div>
+
+  <script>
+    const ITEMS_URL = 'https://raw.githubusercontent.com/ao-data/ao-bin-dumps/master/formatted/items.txt';
+    const ITEMS_CACHE_KEY = 'albion_items_v1';
+    const FAV_KEY = 'albion_favorites';
+    const CITIES = ['Martlock', 'Thetford', 'Fort Sterling', 'Lymhurst', 'Bridgewatch', 'Caerleon', 'Brecilien', 'Black Market'];
+    const API_BASE = { europe: 'https://europe.albion-online-data.com', americas: 'https://west.albion-online-data.com', asia: 'https://east.albion-online-data.com' };
+
+    let catalog = [];
+    let currentItem = null;
+    let searchFocus = -1;
+
+    function fmt(n) {
+      if (n == null || n <= 0) return '—';
+      return n.toLocaleString('uk-UA');
+    }
+
+    function fmtTime(iso) {
+      if (!iso || iso.startsWith('0001')) return '—';
+      const d = new Date(iso);
+      return d.toLocaleString('uk-UA', { day: '2-digit', month: '2-digit', hour: '2-digit', minute: '2-digit' });
+    }
+
+    function taxRates() {
+      const prem = document.getElementById('premium').checked;
+      return {
+        buy: prem ? 0.025 : 0.05,
+        sell: prem ? 0.045 : 0.065,
+        setup: prem ? 0.025 : 0.025
+      };
+    }
+
+    function netBuy(price) {
+      if (!price || price <= 0) return null;
+      return Math.ceil(price * (1 + taxRates().buy));
+    }
+
+    function netSell(price) {
+      if (!price || price <= 0) return null;
+      const t = taxRates();
+      return Math.floor(price * (1 - t.sell - t.setup));
+    }
+
+    function apiUrl(path) {
+      const region = document.getElementById('region').value;
+      return API_BASE[region] + path;
+    }
+
+    function selectedCities() {
+      return [...document.querySelectorAll('#cityChecks input:checked')].map(cb => cb.value);
+    }
+
+    function initCities() {
+      const box = document.getElementById('cityChecks');
+      CITIES.forEach(c => {
+        const lab = document.createElement('label');
+        const cb = document.createElement('input');
+        cb.type = 'checkbox';
+        cb.value = c;
+        cb.checked = c !== 'Black Market';
+        lab.appendChild(cb);
+        lab.appendChild(document.createTextNode(c));
+        box.appendChild(lab);
+      });
+    }
+
+    function parseItemsTxt(text) {
+      const list = [];
+      const re = /^\s*\d+:\s+(\S+)\s+:\s+(.+)$/;
+      for (const line of text.split('\n')) {
+        const m = line.match(re);
+        if (m) list.push({ id: m[1], name: m[2].trim() });
+      }
+      return list;
+    }
+
+    async function loadCatalog() {
+      const status = document.getElementById('catalogStatus');
+      try {
+        const cached = localStorage.getItem(ITEMS_CACHE_KEY);
+        if (cached) {
+          catalog = JSON.parse(cached);
+          status.textContent = `Каталог: ${catalog.length.toLocaleString('uk-UA')} предметів (кеш)`;
+          renderFavorites();
+          return;
+        }
+        const res = await fetch(ITEMS_URL);
+        if (!res.ok) throw new Error(res.statusText);
+        const text = await res.text();
+        catalog = parseItemsTxt(text);
+        try { localStorage.setItem(ITEMS_CACHE_KEY, JSON.stringify(catalog)); } catch (_) {}
+        status.textContent = `Каталог: ${catalog.length.toLocaleString('uk-UA')} предметів`;
+        renderFavorites();
+        if (document.getElementById('panel-builds')?.classList.contains('active')) {
+          grindBuildsCache = null;
+          renderBuilds();
+        }
+      } catch (e) {
+        status.className = 'status err';
+        status.textContent = 'Не вдалося завантажити каталог. Перевірте інтернет або спробуйте пізніше.';
+      }
+    }
+
+    function searchItems(q, limit = 20) {
+      if (!q || q.length < 2) return [];
+      const lower = q.toLowerCase();
+      const idMatch = [];
+      const nameMatch = [];
+      for (const it of catalog) {
+        if (it.id.toLowerCase().includes(lower)) idMatch.push(it);
+        else if (it.name.toLowerCase().includes(lower)) nameMatch.push(it);
+        if (idMatch.length + nameMatch.length >= limit * 2) break;
+      }
+      return [...idMatch, ...nameMatch].slice(0, limit);
+    }
+
+    function showSuggestions(items) {
+      const el = document.getElementById('suggestions');
+      el.innerHTML = '';
+      if (!items.length) { el.classList.remove('open'); return; }
+      items.forEach((it, i) => {
+        const d = document.createElement('div');
+        d.dataset.index = i;
+        d.innerHTML = `${escapeHtml(it.name)}<small>${escapeHtml(it.id)}</small>`;
+        d.addEventListener('click', () => pickItem(it));
+        el.appendChild(d);
+      });
+      el.classList.add('open');
+      searchFocus = -1;
+    }
+
+    function escapeHtml(s) {
+      return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+    }
+
+    function pickItem(it) {
+      currentItem = it;
+      document.getElementById('search').value = it.name;
+      document.getElementById('suggestions').classList.remove('open');
+      loadPrices();
+    }
+
+    function getFavorites() {
+      try { return JSON.parse(localStorage.getItem(FAV_KEY) || '[]'); } catch { return []; }
+    }
+
+    function saveFavorites(fav) {
+      localStorage.setItem(FAV_KEY, JSON.stringify(fav));
+      renderFavorites();
+    }
+
+    function renderFavorites() {
+      const box = document.getElementById('favorites');
+      box.innerHTML = '';
+      getFavorites().forEach(id => {
+        const it = catalog.find(x => x.id === id);
+        const chip = document.createElement('span');
+        chip.className = 'chip';
+        chip.textContent = it ? it.name : id;
+        chip.title = id;
+        chip.addEventListener('click', () => {
+          if (it) pickItem(it);
+          else { currentItem = { id, name: id }; document.getElementById('search').value = id; loadPrices(); }
+        });
+        box.appendChild(chip);
+      });
+    }
+
+    function toggleFavorite() {
+      if (!currentItem) return;
+      let fav = getFavorites();
+      const i = fav.indexOf(currentItem.id);
+      if (i >= 0) fav.splice(i, 1);
+      else fav.unshift(currentItem.id);
+      fav = fav.slice(0, 12);
+      saveFavorites(fav);
+      document.getElementById('btnFav').textContent = fav.includes(currentItem.id) ? '★ В обраному' : '☆ У обране';
+    }
+
+    async function fetchPrices(itemId) {
+      const cities = selectedCities().join(',');
+      const q = document.getElementById('quality').value;
+      const enc = encodeURIComponent(itemId);
+      const url = apiUrl(`/api/v2/stats/prices/${enc}.json?locations=${cities}&qualities=${q}`);
+      const res = await fetch(url);
+      if (!res.ok) throw new Error('API ' + res.status);
+      return res.json();
+    }
+
+    async function loadPrices() {
+      const status = document.getElementById('catalogStatus');
+      let item = currentItem;
+      const raw = document.getElementById('search').value.trim();
+      if (!item && raw) {
+        const exact = catalog.find(x => x.id === raw || x.name === raw);
+        item = exact || catalog.find(x => x.id.toLowerCase() === raw.toLowerCase());
+        if (!item && raw.match(/^T\d_/)) item = { id: raw, name: raw };
+      }
+      if (!item) {
+        status.className = 'status err';
+        status.textContent = 'Оберіть предмет зі списку або введіть точний ID (наприклад T4_2H_BOW).';
+        return;
+      }
+      currentItem = item;
+      status.className = 'status';
+      status.textContent = 'Завантаження цін…';
+
+      try {
+        const data = await fetchPrices(item.id);
+        renderPrices(item, data);
+        status.textContent = `Оновлено для ${item.name}`;
+      } catch (e) {
+        status.className = 'status err';
+        status.textContent = 'Помилка API. Спробуйте інший сервер або пізніше.';
+      }
+    }
+
+    function renderPrices(item, data) {
+      const card = document.getElementById('resultsCard');
+      card.style.display = 'block';
+      const q = document.getElementById('quality').value;
+      document.getElementById('itemName').textContent = item.name;
+      document.getElementById('itemId').textContent = item.id;
+      document.getElementById('itemIcon').src = `https://render.albiononline.com/v1/item/${encodeURIComponent(item.id)}.png?quality=${q}&size=128`;
+      document.getElementById('btnFav').textContent = getFavorites().includes(item.id) ? '★ В обраному' : '☆ У обране';
+
+      const byCity = {};
+      for (const row of data) byCity[row.city] = row;
+
+      let bestBuy = { city: null, price: Infinity };
+      let bestSell = { city: null, price: 0 };
+
+      const tbody = document.getElementById('priceBody');
+      tbody.innerHTML = '';
+      for (const city of selectedCities()) {
+        const row = byCity[city] || {};
+        const buy = row.sell_price_min || 0;
+        const sell = row.buy_price_max || 0;
+        const spread = buy > 0 && sell > 0 ? sell - buy : null;
+
+        if (buy > 0 && buy < bestBuy.price) bestBuy = { city, price: buy };
+        if (sell > bestSell.price) bestSell = { city, price: sell };
+
+        const tr = document.createElement('tr');
+        tr.innerHTML = `
+          <td>${city}</td>
+          <td class="num">${fmt(buy)}</td>
+          <td class="num">${fmt(sell)}</td>
+          <td class="num">${spread != null ? fmt(spread) : '—'}</td>
+          <td class="num" style="font-size:0.8rem;color:var(--muted)">${fmtTime(row.sell_price_min_date)}</td>`;
+        tbody.appendChild(tr);
+      }
+
+      const arb = document.getElementById('arbBox');
+      if (bestBuy.city && bestSell.city && bestBuy.price < Infinity) {
+        const cost = netBuy(bestBuy.price);
+        const revenue = netSell(bestSell.price);
+        const profit = cost != null && revenue != null ? revenue - cost : null;
+        const cls = profit > 0 ? 'profit-pos' : 'profit-neg';
+        arb.innerHTML = `
+          <strong>Орієнтир (з податками)</strong><br>
+          Купити в <strong>${bestBuy.city}</strong> за ~${fmt(cost)} срібла →
+          продати в <strong>${bestSell.city}</strong> за ~${fmt(revenue)} срібла.
+          ${profit != null ? `<br>Прибуток: <span class="${cls}">${fmt(profit)}</span> (без урахування перевезення та ризику)` : ''}
+          <br><small style="color:var(--muted)">Дані залежать від гравців з Albion Data Project. Black Market і Caerleon часто відстають.</small>`;
+      } else {
+        arb.innerHTML = '<small style="color:var(--muted)">Недостатньо даних для порівняння міст.</small>';
+      }
+    }
+
+    function makeCraftRow(container, placeholder) {
+      const row = document.createElement('div');
+      row.className = 'craft-row';
+      row.innerHTML = `
+        <input type="text" placeholder="${placeholder}" class="craft-item">
+        <input type="number" min="1" value="1" class="craft-qty">
+        <button type="button" class="ghost craft-del">×</button>`;
+      row.querySelector('.craft-del').addEventListener('click', () => row.remove());
+      container.appendChild(row);
+    }
+
+    function resolveCraftItem(input) {
+      const t = input.trim();
+      if (!t) return null;
+      const ex = catalog.find(x => x.id === t);
+      if (ex) return ex;
+      const low = t.toLowerCase();
+      return catalog.find(x => x.name.toLowerCase() === low)
+        || catalog.find(x => x.id.toLowerCase() === low)
+        || (t.match(/^T\d_/) ? { id: t, name: t } : null);
+    }
+
+    async function calcCraft() {
+      const status = document.getElementById('craftStatus');
+      const summary = document.getElementById('craftSummary');
+      status.textContent = 'Розрахунок…';
+      status.className = 'status';
+
+      const city = document.getElementById('craftCity').value;
+      const quality = document.getElementById('craftQuality').value;
+      const region = document.getElementById('region').value;
+
+      const collect = (container) => {
+        const rows = [];
+        container.querySelectorAll('.craft-row').forEach(r => {
+          const it = resolveCraftItem(r.querySelector('.craft-item').value);
+          const qty = parseInt(r.querySelector('.craft-qty').value, 10) || 1;
+          if (it) rows.push({ ...it, qty });
+        });
+        return rows;
+      };
+
+      const materials = collect(document.getElementById('materialRows'));
+      const products = collect(document.getElementById('productRows'));
+      if (!materials.length || !products.length) {
+        status.className = 'status err';
+        status.textContent = 'Додайте хоча б один матеріал і один продукт.';
+        return;
+      }
+
+      const ids = [...new Set([...materials, ...products].map(x => x.id))].join(',');
+      const url = `${API_BASE[region]}/api/v2/stats/prices/${encodeURIComponent(ids)}.json?locations=${city}&qualities=${quality}`;
+
+      try {
+        const res = await fetch(url);
+        if (!res.ok) throw new Error('API');
+        const data = await res.json();
+        const priceMap = {};
+        for (const row of data) {
+          if (row.city === city) priceMap[row.item_id] = row;
+        }
+
+        let cost = 0;
+        let revenue = 0;
+        const lines = [];
+
+        for (const m of materials) {
+          const p = priceMap[m.id]?.sell_price_min || 0;
+          const net = netBuy(p) || 0;
+          const sub = net * m.qty;
+          cost += sub;
+          lines.push(`− ${m.name} ×${m.qty}: ${fmt(sub)}`);
+        }
+        for (const p of products) {
+          const row = priceMap[p.id];
+          const sell = row?.buy_price_max || 0;
+          const net = netSell(sell) || 0;
+          const sub = net * p.qty;
+          revenue += sub;
+          lines.push(`+ ${p.name} ×${p.qty}: ${fmt(sub)}`);
+        }
+
+        const profit = revenue - cost;
+        const cls = profit >= 0 ? 'profit-pos' : 'profit-neg';
+        summary.innerHTML = `
+          <div>${lines.join('<br>')}</div>
+          <hr style="border:none;border-top:1px solid var(--border);margin:12px 0">
+          <div>Витрати: <strong>${fmt(cost)}</strong> · Дохід: <strong>${fmt(revenue)}</strong></div>
+          <div style="margin-top:8px;font-size:1.2rem">Прибуток у <strong>${city}</strong>:
+            <span class="${cls}">${fmt(profit)}</span></div>`;
+        status.textContent = 'Готово.';
+      } catch {
+        status.className = 'status err';
+        status.textContent = 'Не вдалося отримати ціни. Перевірте ID предметів і сервер.';
+      }
+    }
+
+    const STORE = {
+      farm: 'albion_farm_v1',
+      builds: 'albion_builds_custom_v1',
+      island: 'albion_island_v1',
+      specs: 'albion_specs_v1'
+    };
+
+    function loadStore(key, fallback) {
+      try { return JSON.parse(localStorage.getItem(key)) ?? fallback; } catch { return fallback; }
+    }
+    function saveStore(key, data) { localStorage.setItem(key, JSON.stringify(data)); }
+
+    const REFINE_BASE_RR = { 4: 0.152, 5: 0.218, 6: 0.275, 7: 0.326, 8: 0.367 };
+    const REFINE_ITEMS = {
+      ore: { raw: 'ORE', refined: 'METALBAR' },
+      hide: { raw: 'HIDE', refined: 'LEATHER' },
+      fiber: { raw: 'FIBER', refined: 'CLOTH' },
+      wood: { raw: 'WOOD', refined: 'PLANKS' },
+      rock: { raw: 'ROCK', refined: 'STONEBLOCK' }
+    };
+
+    const ISLAND_CROPS = [
+      'Морква', 'Квасоля', 'Пшениця', 'Ріпа', 'Капуста', 'Картопля', 'Кукурудза', 'Гарбуз',
+      'Курка', 'Коза', 'Вівця', 'Свиня', 'Корова',
+      'Шахтар', 'Лісоруб', 'Мисливець', 'Рибалка', 'Фермер'
+    ];
+
+    const GRIND_API = 'https://albiononlinegrind.com/api/builds';
+    const GRIND_LOCAL_FILE = 'albion-builds.json';
+    const GRIND_CACHE_KEY = 'albion_grind_builds_v2';
+    const GRIND_CACHE_TTL = 45 * 60 * 1000;
+    const CORS_PROXY = 'https://api.codetabs.com/v1/proxy/?quest=';
+
+    async function fetchJsonUrl(url) {
+      try {
+        const res = await fetch(url);
+        if (res.ok) return await res.json();
+      } catch (_) {}
+      const proxy = CORS_PROXY + encodeURIComponent(url);
+      const res = await fetch(proxy);
+      if (!res.ok) throw new Error('HTTP ' + res.status);
+      return await res.json();
+    }
+
+    async function fetchGrindApiData() {
+      try {
+        const local = await fetch(GRIND_LOCAL_FILE, { cache: 'no-store' });
+        if (local.ok) {
+          const json = await local.json();
+          if (json.builds && json.builds.length) return { json, source: 'local' };
+        }
+      } catch (_) {}
+      const url = `${GRIND_API}?limit=200`;
+      try {
+        const json = await fetchJsonUrl(url);
+        if (json.builds && json.builds.length) return { json, source: 'online' };
+      } catch (e) {
+        throw e;
+      }
+      throw new Error('no data');
+    }
+    const GAMEINFO_BASE = {
+      europe: 'https://gameinfo.albiononline.com',
+      americas: 'https://gameinfo.albiononline.com',
+      asia: 'https://gameinfo-sgp.albiononline.com'
+    };
+
+    const LOCAL_GATHER_BUILDS = [
+      { id: 'gather-ore', tag: 'Gather', name: 'Збір руди', role: 'Miner (локальний шаблон)',
+        gear: { head: 'Gatherer Hood T8', chest: 'Gatherer Garb', shoes: 'Gatherer Workboots', main: 'T8 Pickaxe', off: '—', cape: 'Fort Sterling', food: 'T8 Gathering Stew', pot: 'T8 Gathering Potion' },
+        abilities: 'Перки на руду', notes: 'Для gather — локальні поради. Meta-збірки — з albiononlinegrind.com.' },
+      { id: 'gather-hide', tag: 'Gather', name: 'Збір шкури', role: 'Skinner',
+        gear: { head: 'Gatherer Hood', chest: 'Gatherer Garb', shoes: 'Gatherer Workboots', main: 'Skinning Knife', off: '—', cape: 'Martlock', food: 'Gathering Stew', pot: 'Gathering Potion' },
+        abilities: 'Перки на шкуру', notes: 'Martlock cape для hide.' },
+      { id: 'gather-fiber', tag: 'Gather', name: 'Збір волокна', role: 'Harvester',
+        gear: { head: 'Gatherer Hood', chest: 'Gatherer Garb', shoes: 'Gatherer Workboots', main: 'Sickle', off: '—', cape: 'Lymhurst', food: 'Gathering Stew', pot: 'Gathering Potion' },
+        abilities: 'Перки на волокно', notes: 'Lymhurst cape.' },
+      { id: 'gather-wood', tag: 'Gather', name: 'Збір дерева', role: 'Lumberjack',
+        gear: { head: 'Gatherer Hood', chest: 'Gatherer Garb', shoes: 'Gatherer Workboots', main: 'Axe', off: '—', cape: 'Bridgewatch', food: 'Gathering Stew', pot: 'Gathering Potion' },
+        abilities: 'Перки на дерево', notes: 'Bridgewatch cape.' },
+      { id: 'gather-rock', tag: 'Gather', name: 'Збір каменю', role: 'Quarrier',
+        gear: { head: 'Gatherer Hood', chest: 'Gatherer Garb', shoes: 'Gatherer Workboots', main: 'Stone Pickaxe', off: '—', cape: 'Thetford', food: 'Gathering Stew', pot: 'Gathering Potion' },
+        abilities: 'Перки на камінь', notes: 'Thetford cape.' },
+      { id: 'gather-fish', tag: 'Gather', name: 'Рибалка', role: 'Fisher',
+        gear: { head: 'Fisher Hat', chest: 'Fisher Garb', shoes: 'Fisher Workboots', main: 'T8 Fishing Rod', off: '—', cape: 'Thetford', food: 'Fishing Stew', pot: 'Fishing Potion' },
+        abilities: 'Перки рибалки', notes: 'Перевір ціни риби на ринку перед фармом.' }
+    ];
+
+    let grindBuildsCache = null;
+    let grindLoadError = null;
+    function fameForLevel(level, category) {
+      if (level >= 100) return 0;
+      const base = category === 'gather' ? 45 : category === 'craft' ? 38 : 120;
+      const growth = category === 'gather' ? 1.115 : category === 'craft' ? 1.118 : 1.122;
+      return Math.floor(base * Math.pow(growth, level - 1));
+    }
+
+    function totalFameToLevel(target, category) {
+      let sum = 0;
+      for (let l = 1; l < target; l++) sum += fameForLevel(l, category);
+      return sum;
+    }
+
+    function refineOutput(oreAmount, returnRate) {
+      let remaining = oreAmount;
+      let bars = 0;
+      while (remaining > 0) {
+        bars += remaining;
+        remaining = Math.floor(remaining * returnRate);
+      }
+      return bars;
+    }
+
+    function effectiveReturnRate(tier, specLevel, cityBonus, useFocus) {
+      let rr = REFINE_BASE_RR[tier] || 0.15;
+      rr += specLevel * 0.0025;
+      if (cityBonus) rr *= 1.18;
+      if (useFocus) rr += rr * 0.4;
+      return Math.min(rr, 0.85);
+    }
+
+    // ——— FARM ———
+    function getFarmSessions() { return loadStore(STORE.farm, []); }
+
+    function renderFarm() {
+      const sessions = getFarmSessions();
+      const body = document.getElementById('farmBody');
+      body.innerHTML = '';
+      let totalSilver = 0, totalMin = 0;
+      sessions.forEach((s, i) => {
+        totalSilver += s.silver;
+        totalMin += s.minutes;
+        const perHour = s.minutes > 0 ? Math.round(s.silver / s.minutes * 60) : 0;
+        const tr = document.createElement('tr');
+        tr.innerHTML = `
+          <td style="font-size:0.8rem;color:var(--muted)">${new Date(s.ts).toLocaleString('uk-UA', { day:'2-digit', month:'2-digit', hour:'2-digit', minute:'2-digit' })}</td>
+          <td>${escapeHtml(s.activity)}</td>
+          <td class="num">${fmt(s.silver)}</td>
+          <td class="num">${s.minutes}</td>
+          <td class="num profit-pos">${fmt(perHour)}</td>
+          <td><button type="button" class="ghost" data-i="${i}" style="padding:4px 8px">×</button></td>`;
+        tr.querySelector('button').addEventListener('click', () => {
+          const list = getFarmSessions();
+          list.splice(i, 1);
+          saveStore(STORE.farm, list);
+          renderFarm();
+        });
+        body.appendChild(tr);
+      });
+      const perHourAll = totalMin > 0 ? Math.round(totalSilver / totalMin * 60) : 0;
+      document.getElementById('farmStats').innerHTML = `
+        <div class="stat-box"><div class="val">${fmt(totalSilver)}</div><div class="lbl">Всього срібла</div></div>
+        <div class="stat-box"><div class="val">${Math.round(totalMin / 60 * 10) / 10} год</div><div class="lbl">Час</div></div>
+        <div class="stat-box"><div class="val">${fmt(perHourAll)}</div><div class="lbl">Срібло / год (середнє)</div></div>
+        <div class="stat-box"><div class="val">${sessions.length}</div><div class="lbl">Сесій</div></div>`;
+    }
+
+    function addFarmSession() {
+      const activity = document.getElementById('farmActivity').value.trim() || 'Фарм';
+      const silver = parseInt(document.getElementById('farmSilver').value, 10) || 0;
+      const minutes = parseInt(document.getElementById('farmMinutes').value, 10) || 0;
+      if (silver <= 0 || minutes <= 0) return;
+      const list = getFarmSessions();
+      list.unshift({ activity, silver, minutes, ts: Date.now() });
+      saveStore(STORE.farm, list.slice(0, 200));
+      document.getElementById('farmSilver').value = '';
+      renderFarm();
+    }
+
+    // ——— BUILDS (live meta) ———
+    const GEAR_LABELS = { main: 'Зброя', head: 'Голова', chest: 'Броня', shoes: 'Взуття', off: 'Зміна', cape: 'Плащ', food: 'Їжа', pot: 'Зілля', bag: 'Сумка', mount: 'Їздова' };
+
+    function categoryToTag(cat) {
+      const map = {
+        ZVZ: 'ZvZ', CORRUPTED_DUNGEON: 'Corrupted', HELLGATE_2V2: 'HG', ABYSSAL_DEPTHS_2V2: 'HG',
+        FAME_FARM_SOLO: 'PvE', FAME_FARM_GROUP: 'PvE', FAME_FARM_GROUP_AVALON: 'Avalon',
+        GANK_SOLO: 'Gank', GANK_GROUP: 'Gank', MISTS_SOLO: 'PvP', MISTS_DUO: 'PvP',
+        SMALL_SCALE: 'PvP', OPEN_WORLD: 'PvP', CRYSTAL_ARENA: 'HCE', TRACKING_SOLO: 'Gather'
+      };
+      return map[cat] || 'PvE';
+    }
+
+    function formatItemId(id) {
+      if (!id) return '—';
+      const base = id.split('@')[0];
+      const ench = id.includes('@') ? ' @' + id.split('@')[1] : '';
+      const it = catalog.find(x => x.id === base || x.id === id);
+      return (it ? it.name : base.replace(/^T\d+_/, '').replace(/_/g, ' ')) + ench;
+    }
+
+    function formatSkills(arr) {
+      if (!arr || !arr.length) return '';
+      return arr.filter(s => s && s.length > 1).map(s => s.replace(/_/g, ' ')).join(' · ');
+    }
+
+    function grindToBuild(b) {
+      const tag = categoryToTag(b.category);
+      const alt = [];
+      if (b.helmet_id_alt) alt.push('Голова (alt): ' + formatItemId(b.helmet_id_alt));
+      if (b.chest_id_alt) alt.push('Броня (alt): ' + formatItemId(b.chest_id_alt));
+      if (b.boots_id_alt) alt.push('Взуття (alt): ' + formatItemId(b.boots_id_alt));
+      if (b.cape_id_alt) alt.push('Плащ (alt): ' + formatItemId(b.cape_id_alt));
+      const updated = b.updated_at ? new Date(b.updated_at).toLocaleDateString('uk-UA') : '—';
+      return {
+        id: 'grind-' + b.slug,
+        tag,
+        name: b.title,
+        role: `${b.author || 'Спільнота'} · ↑${b.upvote_count || 0}`,
+        gear: {
+          main: formatItemId(b.weapon_id) + (b.weapon_name ? ` (${b.weapon_name})` : ''),
+          head: formatItemId(b.helmet_id),
+          chest: formatItemId(b.chest_id),
+          shoes: formatItemId(b.boots_id),
+          off: formatItemId(b.offhand_id) || '—',
+          cape: formatItemId(b.cape_id),
+          food: formatItemId(b.food_id),
+          pot: formatItemId(b.potion_id)
+        },
+        abilities: [
+          formatSkills(b.weapon_skills) && 'Зброя: ' + formatSkills(b.weapon_skills),
+          formatSkills(b.helmet_skills) && 'Голова: ' + formatSkills(b.helmet_skills),
+          formatSkills(b.chest_skills) && 'Броня: ' + formatSkills(b.chest_skills),
+          formatSkills(b.boots_skills) && 'Взуття: ' + formatSkills(b.boots_skills)
+        ].filter(Boolean).join(' | '),
+        notes: (b.description || '') + (alt.length ? '\n' + alt.join('\n') : '') +
+          `\nОновлено на Grind: ${updated} · ${b.category}` +
+          (b.tags && b.tags.length ? ' · ' + b.tags.join(', ') : ''),
+        sourceUrl: 'https://albiononlinegrind.com/build/' + b.slug,
+        updatedAt: b.updated_at,
+        upvotes: b.upvote_count,
+        live: true
+      };
+    }
+
+    async function loadGrindBuilds(force = false) {
+      const status = document.getElementById('buildsStatus');
+      if (!force && grindBuildsCache) return grindBuildsCache;
+      try {
+        if (!force) {
+          const raw = localStorage.getItem(GRIND_CACHE_KEY);
+          if (raw) {
+            const { ts, data } = JSON.parse(raw);
+            if (Date.now() - ts < GRIND_CACHE_TTL && data.length) {
+              grindBuildsCache = data;
+              status.textContent = `${data.length} збірок (кеш до ${new Date(ts + GRIND_CACHE_TTL).toLocaleTimeString('uk-UA', { hour: '2-digit', minute: '2-digit' })})`;
+              return data;
+            }
+          }
+        }
+        status.textContent = 'Завантаження збірок…';
+        const { json, source } = await fetchGrindApiData();
+        const mapped = (json.builds || []).map(grindToBuild).sort((a, b) => (b.upvotes || 0) - (a.upvotes || 0));
+        grindBuildsCache = mapped;
+        grindLoadError = null;
+        try { localStorage.setItem(GRIND_CACHE_KEY, JSON.stringify({ ts: Date.now(), data: mapped })); } catch (_) {}
+        const srcLabel = source === 'local' ? `файл ${GRIND_LOCAL_FILE}` : 'albiononlinegrind.com';
+        status.textContent = `${mapped.length} збірок · джерело: ${srcLabel}`;
+        status.className = 'status';
+        return mapped;
+      } catch (e) {
+        grindLoadError = e.message;
+        status.className = 'status err';
+        const raw = localStorage.getItem(GRIND_CACHE_KEY);
+        if (raw) {
+          grindBuildsCache = JSON.parse(raw).data || [];
+          status.textContent = `Онлайн недоступний (CORS). Показано кеш: ${grindBuildsCache.length} збірок. Поруч має бути ${GRIND_LOCAL_FILE}.`;
+          return grindBuildsCache;
+        }
+        grindBuildsCache = [];
+        status.textContent = `Не вдалося завантажити мету. Покладіть ${GRIND_LOCAL_FILE} поруч із HTML або запустіть update-albion-builds.ps1`;
+        return [];
+      }
+    }
+
+    function getCustomBuilds() { return loadStore(STORE.builds, []); }
+
+    function allBuilds() {
+      const custom = getCustomBuilds().map(b => ({ ...b, tag: b.tag || 'custom', custom: true }));
+      const live = grindBuildsCache || [];
+      return [...live, ...LOCAL_GATHER_BUILDS, ...custom];
+    }
+
+    async function renderBuilds() {
+      const filter = document.getElementById('buildFilter').value;
+      const grid = document.getElementById('buildGrid');
+      grid.innerHTML = '';
+      if (filter !== 'custom' && filter !== 'Gather') await loadGrindBuilds();
+      else if (!grindBuildsCache && filter === 'all') await loadGrindBuilds();
+
+      const list = allBuilds().filter(b => {
+        if (filter === 'all') return !b.custom;
+        if (filter === 'custom') return b.custom;
+        if (filter === 'Gather') return b.tag === 'Gather';
+        return b.tag === filter;
+      });
+
+      if (!list.length) {
+        grid.innerHTML = '<p class="hint">Немає збірок. Натисніть «Оновити мету».</p>';
+        return;
+      }
+
+      list.forEach(b => {
+        const card = document.createElement('div');
+        card.className = 'build-card';
+        const tagCls = { PvP: 'pvp', HCE: 'hce', HG: 'hg', Corrupted: 'corrupted', Gank: 'gank', Gather: 'gather', Avalon: 'avalon' }[b.tag] || '';
+        const liveBadge = b.live ? ' <small style="color:var(--success)">● live</small>' : '';
+        card.innerHTML = `<span class="tag ${tagCls}">${escapeHtml(b.tag)}</span><h3>${escapeHtml(b.name)}${liveBadge}</h3><small style="color:var(--muted)">${escapeHtml(b.role || '')}</small>`;
+        card.addEventListener('click', () => showBuildDetail(b, card));
+        grid.appendChild(card);
+      });
+    }
+
+    function showBuildDetail(b, cardEl) {
+      document.querySelectorAll('.build-card').forEach(c => c.classList.remove('active'));
+      if (cardEl) cardEl.classList.add('active');
+      const box = document.getElementById('buildDetail');
+      box.style.display = 'block';
+      if (b.custom) {
+        box.innerHTML = `<h3>${escapeHtml(b.name)} <span class="tag">${escapeHtml(b.tag)}</span></h3>
+          <pre style="white-space:pre-wrap;margin-top:10px;font-size:0.9rem">${escapeHtml(b.text || '')}</pre>
+          <button type="button" class="ghost" id="btnDelBuild" style="margin-top:10px">Видалити</button>`;
+        document.getElementById('btnDelBuild')?.addEventListener('click', () => {
+          saveStore(STORE.builds, getCustomBuilds().filter(x => x.id !== b.id));
+          renderBuilds();
+          box.style.display = 'none';
+        });
+        return;
+      }
+      const gearRows = Object.entries(b.gear || {}).map(([k, v]) => {
+        const label = GEAR_LABELS[k] || k;
+        return `<dt>${label}</dt><dd>${escapeHtml(String(v))}</dd>`;
+      }).join('');
+      const link = b.sourceUrl
+        ? `<p style="margin-top:12px"><a href="${escapeHtml(b.sourceUrl)}" target="_blank" rel="noopener" style="color:var(--accent)">Повний білд на albiononlinegrind.com →</a></p>`
+        : '';
+      box.innerHTML = `
+        <h3>${escapeHtml(b.name)} <span class="tag">${escapeHtml(b.tag)}</span> — ${escapeHtml(b.role || '')}</h3>
+        <dl style="margin-top:10px">${gearRows}</dl>
+        <p style="margin-top:10px"><strong>Навички:</strong> ${escapeHtml(b.abilities || '—')}</p>
+        <pre style="white-space:pre-wrap;margin-top:8px;font-size:0.88rem;color:var(--muted)">${escapeHtml(b.notes || '')}</pre>
+        ${link}`;
+    }
+
+    function equipmentToGear(eq) {
+      if (!eq) return {};
+      return {
+        main: formatItemId(eq.MainHand?.Type),
+        head: formatItemId(eq.Head?.Type),
+        chest: formatItemId(eq.Armor?.Type),
+        shoes: formatItemId(eq.Shoes?.Type),
+        off: formatItemId(eq.OffHand?.Type) || '—',
+        cape: formatItemId(eq.Cape?.Type),
+        food: formatItemId(eq.Food?.Type),
+        pot: formatItemId(eq.Potion?.Type),
+        mount: formatItemId(eq.Mount?.Type)
+      };
+    }
+
+    async function loadKillboardMeta() {
+      const status = document.getElementById('killboardStatus');
+      const box = document.getElementById('killboardMeta');
+      const minIp = parseInt(document.getElementById('kbMinIp').value, 10) || 1100;
+      const limit = Math.min(100, parseInt(document.getElementById('kbLimit').value, 10) || 60);
+      const region = document.getElementById('region').value;
+      status.textContent = 'Завантаження killboard…';
+      status.className = 'status';
+      box.innerHTML = '';
+      try {
+        const base = GAMEINFO_BASE[region] || GAMEINFO_BASE.europe;
+        const events = await fetchJsonUrl(`${base}/api/gameinfo/events?limit=${limit}`);
+        const weapons = {};
+        events.forEach(ev => {
+          const k = ev.Killer;
+          if (!k || (k.AverageItemPower || 0) < minIp) return;
+          const mh = k.Equipment?.MainHand?.Type;
+          if (!mh) return;
+          const key = mh.split('@')[0];
+          if (!weapons[key]) weapons[key] = { count: 0, sample: k, name: formatItemId(mh) };
+          weapons[key].count++;
+        });
+        const top = Object.entries(weapons).sort((a, b) => b[1].count - a[1].count).slice(0, 10);
+        if (!top.length) {
+          status.textContent = 'Немає боїв з таким IP. Зменшіть мін. IP.';
+          return;
+        }
+        status.textContent = `Проаналізовано ${events.length} боїв · IP ≥ ${minIp}`;
+        box.innerHTML = top.map(([, w]) => {
+          const g = equipmentToGear(w.sample.Equipment);
+          const rows = Object.entries(g).filter(([, v]) => v && v !== '—').map(([k, v]) =>
+            `<dt>${GEAR_LABELS[k] || k}</dt><dd>${escapeHtml(v)}</dd>`).join('');
+          return `<div class="build-card" style="cursor:default;margin-bottom:10px">
+            <h3>${escapeHtml(w.name)} <small style="color:var(--muted)">×${w.count}</small></h3>
+            <small style="color:var(--muted)">${escapeHtml(w.sample.Name)} · IP ${Math.round(w.sample.AverageItemPower)}</small>
+            <dl style="margin-top:8px;font-size:0.85rem">${rows}</dl>
+          </div>`;
+        }).join('');
+      } catch {
+        status.className = 'status err';
+        status.textContent = 'Помилка killboard API.';
+      }
+    }
+
+    function saveCustomBuild() {
+      const name = document.getElementById('customBuildName').value.trim();
+      const text = document.getElementById('customBuildText').value.trim();
+      const tag = document.getElementById('customBuildTag').value;
+      if (!name || !text) return;
+      const list = getCustomBuilds();
+      list.unshift({ id: 'c_' + Date.now(), name, tag, text, role: 'Власна' });
+      saveStore(STORE.builds, list.slice(0, 30));
+      document.getElementById('customBuildName').value = '';
+      document.getElementById('customBuildText').value = '';
+      renderBuilds();
+    }
+
+    // ——— ISLAND ———
+    function getIslandTasks() { return loadStore(STORE.island, []); }
+
+    function initIslandPresets() {
+      const sel = document.getElementById('islandPreset');
+      sel.innerHTML = ISLAND_CROPS.map(c => `<option>${c}</option>`).join('');
+    }
+
+    function islandDurationHours() {
+      const type = document.getElementById('islandType').value;
+      if (type === 'custom') return parseFloat(document.getElementById('islandHours').value) || 22;
+      return 22;
+    }
+
+    function addIslandTask() {
+      const name = document.getElementById('islandName').value.trim() || document.getElementById('islandPreset').value;
+      const type = document.getElementById('islandType').value;
+      const preset = document.getElementById('islandPreset').value;
+      const startVal = document.getElementById('islandStart').value;
+      const start = startVal ? new Date(startVal).getTime() : Date.now();
+      const hours = islandDurationHours();
+      const list = getIslandTasks();
+      list.push({ id: Date.now(), name, type, preset, start, hours });
+      saveStore(STORE.island, list);
+      document.getElementById('islandName').value = '';
+      renderIsland();
+    }
+
+    function formatCountdown(ms) {
+      if (ms <= 0) return 'Готово!';
+      const h = Math.floor(ms / 3600000);
+      const m = Math.floor((ms % 3600000) / 60000);
+      return `${h} год ${m} хв`;
+    }
+
+    function renderIsland() {
+      const body = document.getElementById('islandBody');
+      body.innerHTML = '';
+      const now = Date.now();
+      getIslandTasks().forEach((t, i) => {
+        const readyAt = t.start + t.hours * 3600000;
+        const left = readyAt - now;
+        const cls = left <= 0 ? 'timer-ready' : left < 3600000 ? 'timer-overdue' : 'timer-wait';
+        const status = left <= 0 ? '✓ Збирай!' : formatCountdown(left);
+        const tr = document.createElement('tr');
+        tr.innerHTML = `
+          <td>${escapeHtml(t.name)}</td>
+          <td>${escapeHtml(t.preset || t.type)}</td>
+          <td>${new Date(readyAt).toLocaleString('uk-UA', { day:'2-digit', month:'2-digit', hour:'2-digit', minute:'2-digit' })}</td>
+          <td class="${cls}">${status}</td>
+          <td><button type="button" class="ghost" data-i="${i}" style="padding:4px 8px">×</button></td>`;
+        tr.querySelector('button').addEventListener('click', () => {
+          const list = getIslandTasks();
+          list.splice(i, 1);
+          saveStore(STORE.island, list);
+          renderIsland();
+        });
+        body.appendChild(tr);
+      });
+    }
+
+    // ——— REFINE ———
+    async function calcRefine() {
+      const status = document.getElementById('refineStatus');
+      const summary = document.getElementById('refineSummary');
+      status.textContent = 'Завантаження цін…';
+      const tier = parseInt(document.getElementById('refineTier').value, 10);
+      const type = document.getElementById('refineType').value;
+      const city = document.getElementById('refineCity').value;
+      const amount = parseInt(document.getElementById('refineAmount').value, 10) || 0;
+      const spec = parseInt(document.getElementById('refineSpec').value, 10) || 0;
+      const rr = effectiveReturnRate(tier, spec, document.getElementById('refineCityBonus').checked, document.getElementById('refineFocus').checked);
+      const items = REFINE_ITEMS[type];
+      const rawId = `T${tier}_${items.raw}`;
+      const refinedId = `T${tier}_${items.refined}`;
+      const region = document.getElementById('region').value;
+
+      try {
+        const url = `${API_BASE[region]}/api/v2/stats/prices/${rawId},${refinedId}.json?locations=${city}&qualities=1`;
+        const res = await fetch(url);
+        if (!res.ok) throw new Error('API');
+        const data = await res.json();
+        const map = {};
+        data.forEach(r => { if (r.city === city) map[r.item_id] = r; });
+        const orePrice = map[rawId]?.sell_price_min || 0;
+        const barPrice = map[refinedId]?.buy_price_max || 0;
+        if (!orePrice || !barPrice) {
+          status.className = 'status err';
+          status.textContent = 'Немає цін на ринку для цього міста. Спробуйте Caerleon або інший сервер.';
+          return;
+        }
+        const bars = refineOutput(amount, rr);
+        const cost = netBuy(orePrice) * amount;
+        const revenue = netSell(barPrice) * bars;
+        const profit = revenue - cost;
+        const profitPerOre = amount > 0 ? Math.round(profit / amount) : 0;
+        const cls = profit >= 0 ? 'profit-pos' : 'profit-neg';
+        summary.innerHTML = `
+          <div><strong>${rawId}</strong> → <strong>${refinedId}</strong> · ${city} · T${tier}</div>
+          <div style="margin-top:8px">Повернення: <strong>${(rr * 100).toFixed(1)}%</strong> · З ${fmt(amount)} сировини → ~<strong>${fmt(bars)}</strong> продукту</div>
+          <div style="margin-top:6px">Купівля сировини: ${fmt(orePrice)} / од · Продаж продукту: ${fmt(barPrice)} / од</div>
+          <hr style="border:none;border-top:1px solid var(--border);margin:12px 0">
+          <div>Витрати: ${fmt(cost)} · Дохід: ${fmt(revenue)}</div>
+          <div style="margin-top:8px;font-size:1.15rem">Прибуток: <span class="${cls}">${fmt(profit)}</span>
+            <span style="font-size:0.9rem;color:var(--muted)"> (${fmt(profitPerOre)} / од. сировини)</span></div>`;
+        status.textContent = 'Готово.';
+        status.className = 'status';
+      } catch {
+        status.className = 'status err';
+        status.textContent = 'Помилка API. Перевірте інтернет і сервер у вкладці «Ринок».';
+      }
+    }
+
+    // ——— FAME / SPECS ———
+    function getSpecs() { return loadStore(STORE.specs, []); }
+
+    function renderSpecs() {
+      const body = document.getElementById('specBody');
+      body.innerHTML = '';
+      getSpecs().forEach((s, i) => {
+        let fameLeft = 0;
+        for (let l = s.level; l < 100; l++) {
+          fameLeft += fameForLevel(l, s.category);
+        }
+        fameLeft -= s.fame || 0;
+        if (fameLeft < 0) fameLeft = 0;
+        const pct = s.level >= 100 ? 100 : Math.min(100, ((s.fame || 0) / fameForLevel(s.level, s.category)) * 100);
+        const tr = document.createElement('tr');
+        tr.innerHTML = `
+          <td>${escapeHtml(s.name)}</td>
+          <td>${s.category === 'gather' ? 'Збір' : s.category === 'craft' ? 'Крафт' : 'Бій'}</td>
+          <td class="num">${s.level}/100</td>
+          <td class="num">${fmt(fameLeft)}</td>
+          <td><div class="spec-bar"><i style="width:${pct}%"></i></div></td>
+          <td><button type="button" class="ghost" data-i="${i}" style="padding:4px 8px">×</button></td>`;
+        tr.querySelector('button').addEventListener('click', () => {
+          const list = getSpecs();
+          list.splice(i, 1);
+          saveStore(STORE.specs, list);
+          renderSpecs();
+        });
+        body.appendChild(tr);
+      });
+    }
+
+    function addSpec() {
+      const name = document.getElementById('specName').value.trim();
+      if (!name) return;
+      const entry = {
+        name,
+        category: document.getElementById('specCategory').value,
+        level: Math.min(100, parseInt(document.getElementById('specLevel').value, 10) || 0),
+        fame: parseInt(document.getElementById('specFame').value, 10) || 0
+      };
+      let list = getSpecs();
+      const idx = list.findIndex(x => x.name === name && x.category === entry.category);
+      if (idx >= 0) list[idx] = entry;
+      else list.push(entry);
+      saveStore(STORE.specs, list);
+      document.getElementById('specName').value = '';
+      renderSpecs();
+    }
+
+    document.querySelectorAll('.tab').forEach(btn => {
+      btn.addEventListener('click', () => {
+        document.querySelectorAll('.tab').forEach(b => b.classList.remove('active'));
+        document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
+        btn.classList.add('active');
+        document.getElementById('panel-' + btn.dataset.tab).classList.add('active');
+        if (btn.dataset.tab === 'island') renderIsland();
+        if (btn.dataset.tab === 'farm') renderFarm();
+        if (btn.dataset.tab === 'builds') { renderBuilds(); loadKillboardMeta(); }
+        if (btn.dataset.tab === 'fame') renderSpecs();
+      });
+    });
+
+    const searchInput = document.getElementById('search');
+    searchInput.addEventListener('input', () => {
+      currentItem = null;
+      showSuggestions(searchItems(searchInput.value.trim()));
+    });
+    searchInput.addEventListener('keydown', e => {
+      const items = document.querySelectorAll('#suggestions div');
+      if (e.key === 'ArrowDown') { e.preventDefault(); searchFocus = Math.min(searchFocus + 1, items.length - 1); highlightSuggest(items); }
+      else if (e.key === 'ArrowUp') { e.preventDefault(); searchFocus = Math.max(searchFocus - 1, 0); highlightSuggest(items); }
+      else if (e.key === 'Enter') {
+        e.preventDefault();
+        if (searchFocus >= 0 && items[searchFocus]) items[searchFocus].click();
+        else loadPrices();
+      } else if (e.key === 'Escape') document.getElementById('suggestions').classList.remove('open');
+    });
+
+    function highlightSuggest(items) {
+      items.forEach((el, i) => el.classList.toggle('focus', i === searchFocus));
+    }
+
+    document.addEventListener('click', e => {
+      if (!e.target.closest('.search-wrap')) document.getElementById('suggestions').classList.remove('open');
+    });
+
+    document.getElementById('btnLoad').addEventListener('click', loadPrices);
+    document.getElementById('btnFav').addEventListener('click', toggleFavorite);
+    document.getElementById('btnCraftCalc').addEventListener('click', calcCraft);
+    document.getElementById('btnAddMat').addEventListener('click', () => makeCraftRow(document.getElementById('materialRows'), "T4_LEATHER"));
+    document.getElementById('btnAddProd').addEventListener('click', () => makeCraftRow(document.getElementById('productRows'), "T4_ARMOR"));
+    document.getElementById('btnFarmAdd').addEventListener('click', addFarmSession);
+    document.getElementById('btnFarmClear').addEventListener('click', () => { if (confirm('Очистити всю історію фарму?')) { saveStore(STORE.farm, []); renderFarm(); } });
+    document.getElementById('btnSaveBuild').addEventListener('click', saveCustomBuild);
+    document.getElementById('buildFilter').addEventListener('change', () => renderBuilds());
+    document.getElementById('btnBuildsRefresh').addEventListener('click', async () => {
+      grindBuildsCache = null;
+      localStorage.removeItem(GRIND_CACHE_KEY);
+      await loadGrindBuilds(true);
+      await renderBuilds();
+    });
+    document.getElementById('btnKillboard').addEventListener('click', loadKillboardMeta);
+    document.getElementById('btnIslandAdd').addEventListener('click', addIslandTask);
+    document.getElementById('islandType').addEventListener('change', () => {
+      const custom = document.getElementById('islandType').value === 'custom';
+      document.getElementById('islandHoursLabel').style.display = custom ? 'flex' : 'none';
+      document.getElementById('islandPresetLabel').style.display = custom ? 'none' : 'flex';
+    });
+    document.getElementById('btnRefineCalc').addEventListener('click', calcRefine);
+    document.getElementById('btnSpecAdd').addEventListener('click', addSpec);
+    document.getElementById('btnSpecReset').addEventListener('click', () => { if (confirm('Скинути всі спеки?')) { saveStore(STORE.specs, []); renderSpecs(); } });
+
+    initCities();
+    initIslandPresets();
+    const islandStart = document.getElementById('islandStart');
+    const now = new Date();
+    now.setMinutes(now.getMinutes() - now.getTimezoneOffset());
+    islandStart.value = now.toISOString().slice(0, 16);
+
+    makeCraftRow(document.getElementById('materialRows'), 'T4_CLOTH');
+    makeCraftRow(document.getElementById('materialRows'), 'T4_LEATHER');
+    makeCraftRow(document.getElementById('productRows'), 'T4_ARMOR_LEATHER');
+
+    renderFarm();
+    loadGrindBuilds().then(() => renderBuilds());
+    renderIsland();
+    renderSpecs();
+    setInterval(() => {
+      if (document.getElementById('panel-island').classList.contains('active')) renderIsland();
+    }, 60000);
+
+    loadCatalog();
+  </script>
+</body>
+</html>
