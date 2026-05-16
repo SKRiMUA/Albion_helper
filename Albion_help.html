@@ -1,0 +1,1772 @@
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+	<meta charset="UTF-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<title>Albion Online Mega Assistant</title>
+	<link rel="preconnect" href="https://fonts.googleapis.com">
+	<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+	<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@500;700;800&family=Space+Grotesk:wght@500;700&display=swap" rel="stylesheet">
+	<style>
+		:root {
+			--bg-a: #0a141d;
+			--bg-b: #15364a;
+			--panel: #162c3d;
+			--panel-2: #1d3b52;
+			--line: #355f7e;
+			--text: #e9f6ff;
+			--muted: #9bb6cb;
+			--gold: #d9b24d;
+			--gold-dim: #ab8430;
+			--ok: #46d191;
+			--warn: #ffb45f;
+			--bad: #f27b7b;
+		}
+
+		* { box-sizing: border-box; margin: 0; padding: 0; }
+
+		body {
+			min-height: 100vh;
+			font-family: Manrope, "Segoe UI", sans-serif;
+			color: var(--text);
+			background:
+				radial-gradient(circle at 12% 10%, rgba(217, 178, 77, 0.22), transparent 28%),
+				radial-gradient(circle at 88% 88%, rgba(72, 162, 255, 0.2), transparent 30%),
+				linear-gradient(135deg, var(--bg-a), var(--bg-b));
+			padding: 16px;
+		}
+
+		.wrap {
+			max-width: 1280px;
+			margin: 0 auto;
+			display: grid;
+			gap: 12px;
+		}
+
+		.hero,
+		.card {
+			border: 1px solid var(--line);
+			border-radius: 14px;
+			background: linear-gradient(180deg, rgba(24, 42, 57, 0.92), rgba(18, 34, 47, 0.92));
+			box-shadow: 0 20px 40px rgba(0, 0, 0, 0.25);
+		}
+
+		.hero {
+			padding: 16px;
+			position: relative;
+			overflow: hidden;
+			animation: rise 320ms ease-out;
+		}
+
+		.hero::after {
+			content: "";
+			position: absolute;
+			width: 220px;
+			height: 220px;
+			right: -72px;
+			top: -100px;
+			border-radius: 999px;
+			background: radial-gradient(circle, rgba(217, 178, 77, 0.24), transparent 70%);
+			pointer-events: none;
+		}
+
+		h1 {
+			font-family: "Space Grotesk", Manrope, sans-serif;
+			color: var(--gold);
+			font-size: clamp(1.4rem, 2.8vw, 2rem);
+			margin-bottom: 6px;
+			letter-spacing: 0.02em;
+		}
+
+		.hero p { color: var(--muted); }
+
+		.topbar {
+			margin-top: 12px;
+			display: grid;
+			grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+			gap: 8px;
+			align-items: end;
+		}
+
+		.tabs {
+			display: flex;
+			gap: 8px;
+			overflow-x: auto;
+			padding-bottom: 2px;
+		}
+
+		.tab {
+			border: 1px solid var(--line);
+			background: var(--panel);
+			color: var(--muted);
+			border-radius: 10px;
+			padding: 9px 14px;
+			font-size: 0.9rem;
+			font-weight: 700;
+			cursor: pointer;
+			white-space: nowrap;
+		}
+
+		.tab.active {
+			color: var(--gold);
+			border-color: var(--gold);
+			background: linear-gradient(180deg, #2d4255, #1e3448);
+		}
+
+		.panel { display: none; }
+		.panel.active {
+			display: grid;
+			gap: 12px;
+			animation: fade 220ms ease;
+		}
+
+		.card { padding: 14px; }
+
+		.card h2 {
+			color: var(--muted);
+			text-transform: uppercase;
+			letter-spacing: 0.07em;
+			font-size: 0.78rem;
+			margin-bottom: 10px;
+		}
+
+		.row {
+			display: grid;
+			grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+			gap: 8px;
+			align-items: end;
+		}
+
+		.split {
+			display: grid;
+			gap: 12px;
+			grid-template-columns: 1fr 1fr;
+		}
+
+		.tri {
+			display: grid;
+			gap: 12px;
+			grid-template-columns: 1fr 1fr 1fr;
+		}
+
+		label {
+			display: grid;
+			gap: 5px;
+			color: var(--muted);
+			font-size: 0.82rem;
+		}
+
+		input, select, button, textarea {
+			font: inherit;
+			color: var(--text);
+			background: var(--panel-2);
+			border: 1px solid var(--line);
+			border-radius: 9px;
+			padding: 9px 10px;
+		}
+
+		input:focus, select:focus, textarea:focus {
+			outline: 2px solid rgba(217, 178, 77, 0.35);
+			outline-offset: 1px;
+		}
+
+		button {
+			font-weight: 700;
+			cursor: pointer;
+			background: linear-gradient(180deg, #4d7094, #35506d);
+			border-color: #507597;
+		}
+
+		button:hover { filter: brightness(1.1); }
+
+		.primary {
+			background: linear-gradient(180deg, var(--gold), var(--gold-dim));
+			color: #241b09;
+			border-color: var(--gold);
+		}
+
+		.status { margin-top: 8px; color: var(--muted); font-size: 0.86rem; }
+		.status.err { color: var(--bad); }
+
+		.box {
+			border: 1px solid var(--line);
+			border-radius: 10px;
+			background: rgba(11, 24, 33, 0.64);
+			padding: 10px;
+		}
+
+		.kpis {
+			display: grid;
+			grid-template-columns: repeat(auto-fit, minmax(130px, 1fr));
+			gap: 8px;
+			margin-bottom: 8px;
+		}
+
+		.kpi {
+			border: 1px solid var(--line);
+			border-radius: 10px;
+			background: rgba(25, 45, 62, 0.76);
+			padding: 10px;
+			text-align: center;
+		}
+
+		.kpi .v {
+			display: block;
+			font-size: 1.2rem;
+			font-weight: 800;
+			color: var(--gold);
+		}
+
+		.chips {
+			display: flex;
+			gap: 6px;
+			flex-wrap: wrap;
+			margin-top: 8px;
+		}
+
+		.chip {
+			border: 1px solid var(--line);
+			border-radius: 999px;
+			padding: 4px 10px;
+			background: rgba(35, 62, 82, 0.74);
+			color: var(--text);
+			font-size: 0.8rem;
+			cursor: pointer;
+		}
+
+		.chip:hover { color: var(--gold); border-color: var(--gold); }
+
+		.ok { color: var(--ok); }
+		.warn { color: var(--warn); }
+		.bad { color: var(--bad); }
+
+		table {
+			width: 100%;
+			border-collapse: collapse;
+			font-size: 0.9rem;
+		}
+
+		th, td {
+			border-bottom: 1px solid var(--line);
+			padding: 8px 10px;
+			text-align: left;
+		}
+
+		th {
+			text-transform: uppercase;
+			letter-spacing: 0.05em;
+			color: var(--muted);
+			font-size: 0.72rem;
+		}
+
+		.num { text-align: right; font-variant-numeric: tabular-nums; }
+
+		textarea {
+			width: 100%;
+			min-height: 90px;
+			resize: vertical;
+		}
+
+		.tiny { color: var(--muted); font-size: 0.78rem; }
+
+		@media (max-width: 980px) {
+			.split, .tri { grid-template-columns: 1fr; }
+		}
+
+		@keyframes rise {
+			from { opacity: 0; transform: translateY(8px); }
+			to { opacity: 1; transform: translateY(0); }
+		}
+
+		@keyframes fade {
+			from { opacity: 0; transform: translateY(5px); }
+			to { opacity: 1; transform: translateY(0); }
+		}
+	</style>
+</head>
+<body>
+	<main class="wrap">
+		<section class="hero">
+			<h1 id="heroTitle">Albion Online Mega Assistant</h1>
+			<p id="heroText">Live API-помічник: ринок, фліп, алерти, портфель, крафт, рефайн, цілі, PvP/спеки, білди, share та PWA.</p>
+			<div class="topbar">
+				<label>API Region
+					<select id="region">
+						<option value="europe">Europe</option>
+						<option value="americas">Americas</option>
+						<option value="asia">Asia</option>
+					</select>
+				</label>
+				<label>Quality
+					<select id="quality">
+						<option value="1">1</option>
+						<option value="2">2</option>
+						<option value="3">3</option>
+						<option value="4">4</option>
+						<option value="5">5</option>
+					</select>
+				</label>
+				<label>Language
+					<select id="lang">
+						<option value="uk">UA</option>
+						<option value="en">EN</option>
+					</select>
+				</label>
+				<label style="display:flex;align-items:center;gap:8px;margin-top:16px">
+					<input type="checkbox" id="premium" checked>
+					<span>Premium</span>
+				</label>
+				<label style="display:flex;align-items:center;gap:8px;margin-top:16px">
+					<input type="checkbox" id="autoRefresh">
+					<span>Auto refresh</span>
+				</label>
+				<label>Refresh sec
+					<select id="refreshSec">
+						<option value="15">15</option>
+						<option value="30" selected>30</option>
+						<option value="60">60</option>
+					</select>
+				</label>
+			</div>
+			<p class="status" id="onlineStatus">Checking API...</p>
+		</section>
+
+		<nav class="tabs">
+			<button class="tab active" data-panel="planner" id="tabPlanner">Planner</button>
+			<button class="tab" data-panel="market" id="tabMarket">Market</button>
+			<button class="tab" data-panel="craft" id="tabCraft">Craft</button>
+			<button class="tab" data-panel="refine" id="tabRefine">Refine</button>
+			<button class="tab" data-panel="progress" id="tabProgress">Progress</button>
+			<button class="tab" data-panel="manager" id="tabManager">Manager</button>
+			<button class="tab" data-panel="data" id="tabData">Data</button>
+		</nav>
+
+		<section class="panel active" id="panel-planner">
+			<div class="split">
+				<div class="card">
+					<h2>Session planner</h2>
+					<div class="row">
+						<label>Goal
+							<select id="goal">
+								<option value="silver">Silver</option>
+								<option value="pvp">PvP</option>
+								<option value="pve">PvE</option>
+								<option value="gather">Gather</option>
+								<option value="craft">Craft/Refine</option>
+							</select>
+						</label>
+						<label>Budget
+							<input id="budget" type="number" min="50000" step="50000" value="500000">
+						</label>
+						<label>Session min
+							<input id="minutes" type="number" min="30" max="360" value="90">
+						</label>
+						<label>Risk
+							<select id="risk">
+								<option value="low">Low</option>
+								<option value="mid" selected>Mid</option>
+								<option value="high">High</option>
+							</select>
+						</label>
+						<label>Tier
+							<select id="tier">
+								<option value="4">T4</option>
+								<option value="5" selected>T5</option>
+								<option value="6">T6</option>
+								<option value="7">T7</option>
+								<option value="8">T8</option>
+							</select>
+						</label>
+						<button class="primary" type="button" id="btnPlan">Build plan</button>
+					</div>
+					<div class="kpis" id="planKpis" style="margin-top:8px"></div>
+					<div class="box" id="planOutput"></div>
+				</div>
+
+				<div class="card">
+					<h2>Weekly goals</h2>
+					<div class="row">
+						<label>Target silver/week
+							<input id="weekTarget" type="number" value="10000000" min="100000">
+						</label>
+						<label>Current silver
+							<input id="weekCurrent" type="number" value="0" min="0">
+						</label>
+						<label>Play hours/day
+							<input id="weekHoursDay" type="number" value="2" min="0.5" step="0.5">
+						</label>
+						<button class="primary" type="button" id="btnWeekPlan">Calculate week plan</button>
+					</div>
+					<div class="box" id="weekOut" style="margin-top:8px"></div>
+				</div>
+			</div>
+		</section>
+
+		<section class="panel" id="panel-market">
+			<div class="tri">
+				<div class="card">
+					<h2>Item live prices</h2>
+					<label>Item name or ID
+						<input id="itemSearch" type="text" placeholder="T4_2H_BOW">
+					</label>
+					<label style="margin-top:8px">Cities (comma)
+						<input id="cities" type="text" value="Martlock,Thetford,Fort Sterling,Lymhurst,Bridgewatch,Caerleon,Brecilien,Black Market">
+					</label>
+					<div class="row" style="margin-top:8px">
+						<button class="primary" id="btnLoadPrice" type="button">Load prices</button>
+						<button id="btnFav" type="button">Favorite</button>
+					</div>
+					<div class="chips" id="favorites"></div>
+					<p class="status" id="marketStatus"></p>
+					<div class="box" style="margin-top:8px;overflow-x:auto">
+						<table>
+							<thead><tr><th>City</th><th class="num">Sell min</th><th class="num">Buy max</th><th class="num">Spread</th></tr></thead>
+							<tbody id="priceBody"></tbody>
+						</table>
+					</div>
+					<div class="box" id="arbOne" style="margin-top:8px"></div>
+				</div>
+
+				<div class="card">
+					<h2>Smart flip scanner</h2>
+					<label>Item IDs list
+						<textarea id="arbItems" placeholder="T4_BAG, T4_CAPE, T4_2H_BOW"></textarea>
+					</label>
+					<div class="row" style="margin-top:8px">
+						<label>Min profit
+							<input id="minProfit" type="number" value="1000" min="0">
+						</label>
+						<button class="primary" id="btnScanArb" type="button">Scan top flips</button>
+					</div>
+					<p class="status" id="arbStatus"></p>
+					<div class="box" style="margin-top:8px;overflow-x:auto">
+						<table>
+							<thead><tr><th>Item</th><th>Buy city</th><th>Sell city</th><th class="num">Profit</th></tr></thead>
+							<tbody id="arbBody"></tbody>
+						</table>
+					</div>
+				</div>
+
+				<div class="card">
+					<h2>Price alerts</h2>
+					<div class="row">
+						<label>Item ID
+							<input id="alertItem" type="text" placeholder="T4_BAG">
+						</label>
+						<label>City
+							<input id="alertCity" type="text" value="Caerleon">
+						</label>
+						<label>Condition
+							<select id="alertCond">
+								<option value="lte">Sell min <=</option>
+								<option value="gte">Buy max >=</option>
+							</select>
+						</label>
+						<label>Target
+							<input id="alertTarget" type="number" value="10000" min="1">
+						</label>
+						<button class="primary" id="btnAddAlert" type="button">Add alert</button>
+					</div>
+					<div class="row" style="margin-top:8px">
+						<button id="btnRunAlerts" type="button">Check alerts now</button>
+						<button id="btnNotif" type="button">Enable notifications</button>
+					</div>
+					<p class="status" id="alertStatus"></p>
+					<div class="box" style="margin-top:8px;overflow-x:auto">
+						<table>
+							<thead><tr><th>Item</th><th>City</th><th>Rule</th><th>State</th><th></th></tr></thead>
+							<tbody id="alertBody"></tbody>
+						</table>
+					</div>
+				</div>
+			</div>
+		</section>
+
+		<section class="panel" id="panel-craft">
+			<div class="card">
+				<h2>Advanced craft calculator</h2>
+				<div class="row">
+					<label>City
+						<select id="craftCity">
+							<option>Caerleon</option><option>Martlock</option><option>Thetford</option><option>Fort Sterling</option><option>Lymhurst</option><option>Bridgewatch</option><option>Brecilien</option>
+						</select>
+					</label>
+					<button class="primary" id="btnCraft" type="button">Calculate craft</button>
+				</div>
+				<div class="split" style="margin-top:8px">
+					<label>Materials (ITEM qty)
+						<textarea id="craftMats" placeholder="T4_CLOTH 16&#10;T4_LEATHER 8"></textarea>
+					</label>
+					<label>Products (ITEM qty)
+						<textarea id="craftProd" placeholder="T4_ARMOR_LEATHER 1"></textarea>
+					</label>
+				</div>
+				<div class="box" id="craftOut" style="margin-top:8px"></div>
+				<p class="status" id="craftStatus"></p>
+			</div>
+		</section>
+
+		<section class="panel" id="panel-refine">
+			<div class="split">
+				<div class="card">
+					<h2>Refine single city</h2>
+					<div class="row">
+						<label>Type
+							<select id="refineType">
+								<option value="ore">Ore -> Bar</option>
+								<option value="hide">Hide -> Leather</option>
+								<option value="fiber">Fiber -> Cloth</option>
+								<option value="wood">Wood -> Planks</option>
+								<option value="rock">Rock -> Blocks</option>
+							</select>
+						</label>
+						<label>Tier
+							<select id="refineTier">
+								<option value="4">T4</option><option value="5">T5</option><option value="6">T6</option><option value="7">T7</option><option value="8">T8</option>
+							</select>
+						</label>
+						<label>City
+							<select id="refineCity">
+								<option>Caerleon</option><option>Martlock</option><option>Thetford</option><option>Fort Sterling</option><option>Lymhurst</option><option>Bridgewatch</option>
+							</select>
+						</label>
+						<label>Amount
+							<input id="refineAmount" type="number" value="1000" min="1">
+						</label>
+						<label>Spec 0-100
+							<input id="refineSpec" type="number" value="0" min="0" max="100">
+						</label>
+						<label style="display:flex;align-items:center;gap:8px;margin-top:16px"><input id="refineFocus" type="checkbox"><span>Focus</span></label>
+						<label style="display:flex;align-items:center;gap:8px;margin-top:16px"><input id="refineBonus" type="checkbox" checked><span>City bonus</span></label>
+						<button class="primary" id="btnRefine" type="button">Calculate refine</button>
+					</div>
+					<div class="box" id="refineOut" style="margin-top:8px"></div>
+					<p class="status" id="refineStatus"></p>
+				</div>
+
+				<div class="card">
+					<h2>Best city compare</h2>
+					<p class="tiny">Compares refine profit across major cities for current setup.</p>
+					<div class="row" style="margin-top:8px">
+						<button class="primary" id="btnRefineCompare" type="button">Compare all cities</button>
+					</div>
+					<p class="status" id="refineCompareStatus"></p>
+					<div class="box" style="margin-top:8px;overflow-x:auto">
+						<table>
+							<thead><tr><th>City</th><th class="num">Cost</th><th class="num">Revenue</th><th class="num">Profit</th></tr></thead>
+							<tbody id="refineCompareBody"></tbody>
+						</table>
+					</div>
+				</div>
+			</div>
+		</section>
+
+		<section class="panel" id="panel-progress">
+			<div class="tri">
+				<div class="card">
+					<h2>Island timers</h2>
+					<div class="row">
+						<label>Name <input id="islandName" type="text" placeholder="Plot 1"></label>
+						<label>Hours <input id="islandHours" type="number" value="22" min="1"></label>
+						<label>Start <input id="islandStart" type="datetime-local"></label>
+						<button class="primary" id="btnIslandAdd" type="button">Add timer</button>
+					</div>
+					<p class="status" id="islandStatus"></p>
+					<div class="box" style="margin-top:8px;overflow-x:auto">
+						<table><thead><tr><th>Name</th><th>Ready at</th><th>Status</th><th></th></tr></thead><tbody id="islandBody"></tbody></table>
+					</div>
+				</div>
+
+				<div class="card">
+					<h2>Farm sessions</h2>
+					<div class="row">
+						<label>Activity <input id="farmName" type="text" placeholder="Mists"></label>
+						<label>Silver <input id="farmSilver" type="number" min="0" value="0"></label>
+						<label>Minutes <input id="farmMinutes" type="number" min="1" value="60"></label>
+						<button class="primary" id="btnFarmAdd" type="button">Add session</button>
+					</div>
+					<div class="kpis" id="farmKpi" style="margin-top:8px"></div>
+					<div class="box" style="margin-top:8px;overflow-x:auto">
+						<table><thead><tr><th>Time</th><th>Activity</th><th class="num">Silver</th><th class="num">/h</th><th></th></tr></thead><tbody id="farmBody"></tbody></table>
+					</div>
+				</div>
+
+				<div class="card">
+					<h2>PvP + Specs tracker</h2>
+					<div class="row">
+						<label>Result
+							<select id="pvpResult"><option value="win">Win</option><option value="loss">Loss</option></select>
+						</label>
+						<label>Loot +
+							<input id="pvpLoot" type="number" value="0" min="0">
+						</label>
+						<label>Loss -
+							<input id="pvpLoss" type="number" value="0" min="0">
+						</label>
+						<button class="primary" id="btnPvpAdd" type="button">Add PvP event</button>
+					</div>
+					<div class="kpis" id="pvpKpi" style="margin-top:8px"></div>
+					<div class="row" style="margin-top:8px">
+						<label>Spec name <input id="specName" type="text" placeholder="Bow"></label>
+						<label>Category
+							<select id="specCat"><option value="combat">Combat</option><option value="gather">Gather</option><option value="craft">Craft</option></select>
+						</label>
+						<label>Level <input id="specLevel" type="number" min="0" max="100" value="0"></label>
+						<label>Fame in level <input id="specFame" type="number" min="0" value="0"></label>
+						<button class="primary" id="btnSpecAdd" type="button">Add spec</button>
+					</div>
+					<div class="box" style="margin-top:8px;overflow-x:auto">
+						<table><thead><tr><th>Spec</th><th>Cat</th><th class="num">Lvl</th><th class="num">Fame left</th><th></th></tr></thead><tbody id="specBody"></tbody></table>
+					</div>
+				</div>
+			</div>
+		</section>
+
+		<section class="panel" id="panel-manager">
+			<div class="split">
+				<div class="card">
+					<h2>Portfolio + transport routes</h2>
+					<div class="row">
+						<label>Item ID <input id="portItem" type="text" placeholder="T4_BAG"></label>
+						<label>Qty <input id="portQty" type="number" value="1" min="1"></label>
+						<label>Entry price <input id="portEntry" type="number" value="0" min="0"></label>
+						<label>City <input id="portCity" type="text" value="Caerleon"></label>
+						<button class="primary" id="btnPortAdd" type="button">Add holding</button>
+					</div>
+					<p class="status" id="portStatus"></p>
+					<div class="row" style="margin-top:8px">
+						<button id="btnPortRefresh" type="button">Refresh portfolio prices</button>
+					</div>
+					<div class="box" style="margin-top:8px;overflow-x:auto">
+						<table>
+							<thead><tr><th>Item</th><th class="num">Qty</th><th class="num">Entry</th><th class="num">Now</th><th class="num">PnL</th><th></th></tr></thead>
+							<tbody id="portBody"></tbody>
+						</table>
+					</div>
+
+					<h2 style="margin-top:12px">Route calculator</h2>
+					<div class="row">
+						<label>Item ID <input id="routeItem" type="text" placeholder="T4_BAG"></label>
+						<label>Qty <input id="routeQty" type="number" value="10" min="1"></label>
+						<label>From city <input id="routeFrom" type="text" value="Martlock"></label>
+						<label>To city <input id="routeTo" type="text" value="Caerleon"></label>
+						<label>Risk % <input id="routeRisk" type="number" value="5" min="0" max="100"></label>
+						<label>Minutes/run <input id="routeMin" type="number" value="20" min="1"></label>
+						<button class="primary" id="btnRouteCalc" type="button">Calc route</button>
+					</div>
+					<div class="box" id="routeOut" style="margin-top:8px"></div>
+				</div>
+
+				<div class="card">
+					<h2>Build manager</h2>
+					<div class="row">
+						<label>Name <input id="buildName" type="text" placeholder="1v1 Bow"></label>
+						<label>Tag
+							<select id="buildTag"><option>PvP</option><option>PvE</option><option>Gather</option><option>Craft</option><option>ZvZ</option></select>
+						</label>
+					</div>
+					<label style="margin-top:8px">Build text
+						<textarea id="buildText" placeholder="Head: ...&#10;Chest: ...&#10;Weapon: ..."></textarea>
+					</label>
+					<div class="row" style="margin-top:8px">
+						<button class="primary" id="btnBuildSave" type="button">Save build</button>
+					</div>
+					<div class="box" style="margin-top:8px;overflow-x:auto">
+						<table><thead><tr><th>Name</th><th>Tag</th><th>Text</th><th></th></tr></thead><tbody id="buildBody"></tbody></table>
+					</div>
+				</div>
+			</div>
+		</section>
+
+		<section class="panel" id="panel-data">
+			<div class="split">
+				<div class="card">
+					<h2>Notes + share</h2>
+					<label>Notes
+						<textarea id="notes" placeholder="Your notes, checklists, routes..."></textarea>
+					</label>
+					<div class="row" style="margin-top:8px">
+						<button class="primary" id="btnSaveNotes" type="button">Save notes</button>
+						<button id="btnShareLink" type="button">Generate share link</button>
+					</div>
+					<textarea id="shareLink" placeholder="Share link appears here"></textarea>
+					<p class="status" id="notesStatus"></p>
+
+					<h2 style="margin-top:12px">Auto backup</h2>
+					<div class="row">
+						<label>Every (min)
+							<select id="backupMin"><option value="5">5</option><option value="15" selected>15</option><option value="30">30</option><option value="60">60</option></select>
+						</label>
+						<label style="display:flex;align-items:center;gap:8px;margin-top:16px"><input id="backupOn" type="checkbox"><span>Enable auto backup</span></label>
+						<button id="btnBackupNow" type="button">Backup now</button>
+						<button id="btnDownloadBackup" type="button">Download latest backup</button>
+					</div>
+					<p class="status" id="backupStatus"></p>
+				</div>
+
+				<div class="card">
+					<h2>Import/Export + API health + PWA</h2>
+					<div class="row">
+						<button class="primary" id="btnExport" type="button">Export JSON</button>
+						<button id="btnImport" type="button">Import JSON</button>
+						<button id="btnApiHealth" type="button">Check API health</button>
+						<button id="btnInstallPwa" type="button">Install app (PWA)</button>
+					</div>
+					<textarea id="dataJson" placeholder="Export/import JSON"></textarea>
+					<p class="status" id="dataStatus"></p>
+					<div class="box" style="margin-top:8px;overflow-x:auto">
+						<table><thead><tr><th>Region</th><th>Status</th><th class="num">Latency ms</th></tr></thead><tbody id="apiHealthBody"></tbody></table>
+					</div>
+					<p class="tiny" style="margin-top:8px">Tip: host this file on GitHub Pages/Netlify/Vercel for full online mode. PWA install works best on HTTPS.</p>
+				</div>
+			</div>
+		</section>
+	</main>
+
+	<script>
+		const API_BASE = {
+			europe: 'https://europe.albion-online-data.com',
+			americas: 'https://west.albion-online-data.com',
+			asia: 'https://east.albion-online-data.com'
+		};
+		const ITEMS_URL = 'https://raw.githubusercontent.com/ao-data/ao-bin-dumps/master/formatted/items.txt';
+		const STORE_KEY = 'albion_mega_helper_v2';
+		const REFINE_BASE = { 4: 0.152, 5: 0.218, 6: 0.275, 7: 0.326, 8: 0.367 };
+		const REFINE_ITEMS = {
+			ore: { raw: 'ORE', ref: 'METALBAR' },
+			hide: { raw: 'HIDE', ref: 'LEATHER' },
+			fiber: { raw: 'FIBER', ref: 'CLOTH' },
+			wood: { raw: 'WOOD', ref: 'PLANKS' },
+			rock: { raw: 'ROCK', ref: 'STONEBLOCK' }
+		};
+
+		const state = {
+			catalog: [],
+			currentItem: null,
+			loadingPrice: false,
+			refreshTimer: null,
+			alertTimer: null,
+			backupTimer: null,
+			deferredInstallPrompt: null,
+			data: {
+				settings: { region: 'europe', quality: '1', premium: true, autoRefresh: false, refreshSec: '30', lang: 'uk', backupOn: false, backupMin: '15' },
+				planner: { goal: 'silver', budget: 500000, minutes: 90, risk: 'mid', tier: '5' },
+				weekGoal: { target: 10000000, current: 0, hoursDay: 2 },
+				favorites: [],
+				alerts: [],
+				portfolio: [],
+				notes: '',
+				island: [],
+				farm: [],
+				pvp: [],
+				specs: [],
+				builds: [],
+				backups: []
+			}
+		};
+
+		const i18n = {
+			uk: {
+				heroTitle: 'Albion Online Mega Assistant',
+				heroText: 'Live API-помічник: ринок, фліп, алерти, портфель, крафт, рефайн, цілі, PvP/спеки, білди, share та PWA.'
+			},
+			en: {
+				heroTitle: 'Albion Online Mega Assistant',
+				heroText: 'Live API helper: market, flip scanner, alerts, portfolio, craft, refine, goals, PvP/specs, builds, share and PWA.'
+			}
+		};
+
+		const planTemplates = {
+			silver: { title: 'Silver farming', route: 'Mists + short solo dungeon loops.', build: 'Mobile build with 1 defensive reset.', checklist: 'Repair, food, potions, unload loot often.' },
+			pvp: { title: 'PvP progression', route: 'Corrupted / Mists in short rounds.', build: 'Burst + mobility, fixed loss budget.', checklist: 'Stop after 2-3 lost sets.' },
+			pve: { title: 'PvE / Fame', route: 'Stable fame loops in safer zones.', build: 'AoE and energy efficient skills.', checklist: 'Compare loot selling city each 20 min.' },
+			gather: { title: 'Gathering loop', route: '2-3 map route, bank at 70-80% weight.', build: 'Gather set + escape options.', checklist: 'Avoid long stay in one hotspot.' },
+			craft: { title: 'Craft / Refine', route: 'Buy -> process -> sell by demand.', build: 'Niche set of items, monitor margins.', checklist: 'Count net profit after taxes.' }
+		};
+
+		function $(id) { return document.getElementById(id); }
+		function money(v) { return Math.round(v || 0).toLocaleString('uk-UA'); }
+		function nowIsoLocal() {
+			const n = new Date();
+			n.setMinutes(n.getMinutes() - n.getTimezoneOffset());
+			return n.toISOString().slice(0, 16);
+		}
+
+		function saveState() { localStorage.setItem(STORE_KEY, JSON.stringify(state.data)); }
+		function loadState() {
+			try {
+				const raw = localStorage.getItem(STORE_KEY);
+				if (raw) state.data = { ...state.data, ...JSON.parse(raw) };
+			} catch (_) {}
+		}
+
+		function applyLanguage() {
+			const lang = $('lang').value;
+			const dict = i18n[lang] || i18n.uk;
+			$('heroTitle').textContent = dict.heroTitle;
+			$('heroText').textContent = dict.heroText;
+			state.data.settings.lang = lang;
+			saveState();
+		}
+
+		function taxRates() {
+			const premium = $('premium').checked;
+			return { buy: premium ? 0.025 : 0.05, sell: premium ? 0.045 : 0.065, setup: 0.025 };
+		}
+		function netBuy(price) {
+			if (!price || price <= 0) return null;
+			return Math.ceil(price * (1 + taxRates().buy));
+		}
+		function netSell(price) {
+			if (!price || price <= 0) return null;
+			const t = taxRates();
+			return Math.floor(price * (1 - t.sell - t.setup));
+		}
+
+		function api(path, region) {
+			const r = region || $('region').value;
+			return API_BASE[r] + path;
+		}
+
+		function parseItems(text) {
+			const list = [];
+			const re = /^\s*\d+:\s+(\S+)\s+:\s+(.+)$/;
+			text.split('\n').forEach(line => {
+				const m = line.match(re);
+				if (m) list.push({ id: m[1], name: m[2].trim() });
+			});
+			return list;
+		}
+
+		async function loadCatalog() {
+			try {
+				const res = await fetch(ITEMS_URL);
+				if (!res.ok) throw new Error('catalog');
+				state.catalog = parseItems(await res.text());
+			} catch (_) {
+				state.catalog = [];
+			}
+		}
+
+		function findItem(raw) {
+			const q = (raw || '').trim();
+			if (!q) return null;
+			const low = q.toLowerCase();
+			const exact = state.catalog.find(x => x.id.toLowerCase() === low || x.name.toLowerCase() === low);
+			if (exact) return exact;
+			const starts = state.catalog.find(x => x.name.toLowerCase().startsWith(low));
+			if (starts) return starts;
+			if (/^T\d_/.test(q)) return { id: q, name: q };
+			return null;
+		}
+
+		function cityList() {
+			return $('cities').value.split(',').map(x => x.trim()).filter(Boolean);
+		}
+
+		async function fetchPrices(itemId, cities, quality) {
+			const q = quality || $('quality').value;
+			const url = api('/api/v2/stats/prices/' + encodeURIComponent(itemId) + '.json?locations=' + encodeURIComponent(cities.join(',')) + '&qualities=' + q);
+			const res = await fetch(url);
+			if (!res.ok) throw new Error('API ' + res.status);
+			return await res.json();
+		}
+
+		function setStatus(id, text, err) {
+			$(id).textContent = text;
+			$(id).className = err ? 'status err' : 'status';
+		}
+
+		async function checkOnline() {
+			try {
+				const t0 = performance.now();
+				const res = await fetch(api('/api/v2/stats/prices/T4_BAG.json?locations=Caerleon&qualities=1'));
+				if (!res.ok) throw new Error();
+				const ms = Math.round(performance.now() - t0);
+				$('onlineStatus').textContent = 'API online, ' + ms + ' ms';
+				$('onlineStatus').className = 'status ok';
+			} catch (_) {
+				$('onlineStatus').textContent = 'API unavailable right now.';
+				$('onlineStatus').className = 'status err';
+			}
+		}
+
+		async function checkApiHealth() {
+			$('apiHealthBody').innerHTML = '';
+			for (const r of Object.keys(API_BASE)) {
+				const tr = document.createElement('tr');
+				tr.innerHTML = '<td>' + r + '</td><td>checking...</td><td class="num">-</td>';
+				$('apiHealthBody').appendChild(tr);
+				try {
+					const t0 = performance.now();
+					const res = await fetch(api('/api/v2/stats/prices/T4_BAG.json?locations=Caerleon&qualities=1', r));
+					const ms = Math.round(performance.now() - t0);
+					tr.cells[1].innerHTML = res.ok ? '<span class="ok">ok</span>' : '<span class="bad">error</span>';
+					tr.cells[2].textContent = String(ms);
+				} catch (_) {
+					tr.cells[1].innerHTML = '<span class="bad">offline</span>';
+					tr.cells[2].textContent = '-';
+				}
+			}
+		}
+
+		function renderFavorites() {
+			$('favorites').innerHTML = '';
+			state.data.favorites.forEach(id => {
+				const b = document.createElement('button');
+				b.type = 'button';
+				b.className = 'chip';
+				b.textContent = id;
+				b.addEventListener('click', () => {
+					$('itemSearch').value = id;
+					loadOneItem();
+				});
+				$('favorites').appendChild(b);
+			});
+			$('arbItems').value = state.data.favorites.join(', ');
+		}
+
+		function addFavorite() {
+			const it = findItem($('itemSearch').value);
+			if (!it) {
+				setStatus('marketStatus', 'Invalid item.', true);
+				return;
+			}
+			if (!state.data.favorites.includes(it.id)) state.data.favorites.unshift(it.id);
+			state.data.favorites = state.data.favorites.slice(0, 50);
+			saveState();
+			renderFavorites();
+			setStatus('marketStatus', 'Added to favorites: ' + it.id);
+		}
+
+		async function loadOneItem() {
+			if (state.loadingPrice) return;
+			const item = findItem($('itemSearch').value);
+			const cities = cityList();
+			if (!item || !cities.length) {
+				setStatus('marketStatus', 'Enter item and cities.', true);
+				return;
+			}
+			state.loadingPrice = true;
+			state.currentItem = item;
+			setStatus('marketStatus', 'Loading prices...');
+			$('priceBody').innerHTML = '';
+			try {
+				const rows = await fetchPrices(item.id, cities);
+				const byCity = {};
+				rows.forEach(r => { byCity[r.city] = r; });
+				let bestBuy = { city: null, price: Infinity };
+				let bestSell = { city: null, price: 0 };
+				cities.forEach(c => {
+					const r = byCity[c] || {};
+					const buy = r.sell_price_min || 0;
+					const sell = r.buy_price_max || 0;
+					const spread = buy > 0 && sell > 0 ? sell - buy : null;
+					if (buy > 0 && buy < bestBuy.price) bestBuy = { city: c, price: buy };
+					if (sell > bestSell.price) bestSell = { city: c, price: sell };
+					const tr = document.createElement('tr');
+					tr.innerHTML = '<td>' + c + '</td><td class="num">' + (buy ? money(buy) : '-') + '</td><td class="num">' + (sell ? money(sell) : '-') + '</td><td class="num">' + (spread != null ? money(spread) : '-') + '</td>';
+					$('priceBody').appendChild(tr);
+				});
+				if (bestBuy.city && bestSell.city && bestBuy.price < Infinity) {
+					const cost = netBuy(bestBuy.price) || 0;
+					const rev = netSell(bestSell.price) || 0;
+					const profit = rev - cost;
+					const cls = profit >= 0 ? 'ok' : 'bad';
+					$('arbOne').innerHTML = 'Item: <strong>' + item.id + '</strong><br>Buy in <strong>' + bestBuy.city + '</strong>: ' + money(cost) + '<br>Sell in <strong>' + bestSell.city + '</strong>: ' + money(rev) + '<br>Net: <strong class="' + cls + '">' + money(profit) + '</strong>';
+				} else {
+					$('arbOne').textContent = 'Not enough city data.';
+				}
+				setStatus('marketStatus', 'Updated: ' + item.id);
+			} catch (_) {
+				setStatus('marketStatus', 'API error while loading prices.', true);
+			} finally {
+				state.loadingPrice = false;
+			}
+		}
+
+		async function scanArb() {
+			const ids = $('arbItems').value.split(/[\n,]+/).map(x => x.trim()).filter(Boolean);
+			const cities = cityList();
+			const minProfit = parseInt($('minProfit').value, 10) || 0;
+			if (!ids.length || !cities.length) {
+				setStatus('arbStatus', 'Add item IDs and cities.', true);
+				return;
+			}
+			$('arbBody').innerHTML = '';
+			setStatus('arbStatus', 'Scanning ' + ids.length + ' items...');
+
+			const out = [];
+			for (const id of ids) {
+				try {
+					const rows = await fetchPrices(id, cities);
+					const byCity = {};
+					rows.forEach(r => { byCity[r.city] = r; });
+					let bestBuy = { city: null, price: Infinity };
+					let bestSell = { city: null, price: 0 };
+					cities.forEach(c => {
+						const row = byCity[c] || {};
+						const b = row.sell_price_min || 0;
+						const s = row.buy_price_max || 0;
+						if (b > 0 && b < bestBuy.price) bestBuy = { city: c, price: b };
+						if (s > bestSell.price) bestSell = { city: c, price: s };
+					});
+					if (!bestBuy.city || !bestSell.city || bestBuy.price === Infinity) continue;
+					const p = (netSell(bestSell.price) || 0) - (netBuy(bestBuy.price) || 0);
+					if (p >= minProfit) out.push({ id, buy: bestBuy.city, sell: bestSell.city, p });
+				} catch (_) {}
+			}
+			out.sort((a, b) => b.p - a.p);
+			out.slice(0, 30).forEach(x => {
+				const tr = document.createElement('tr');
+				tr.innerHTML = '<td>' + x.id + '</td><td>' + x.buy + '</td><td>' + x.sell + '</td><td class="num ok">' + money(x.p) + '</td>';
+				$('arbBody').appendChild(tr);
+			});
+			setStatus('arbStatus', out.length ? 'Found ' + out.length + ' profitable flips.' : 'No profitable flips found.');
+		}
+
+		function renderAlerts() {
+			$('alertBody').innerHTML = '';
+			state.data.alerts.forEach((a, i) => {
+				const tr = document.createElement('tr');
+				tr.innerHTML = '<td>' + a.item + '</td><td>' + a.city + '</td><td>' + a.cond + ' ' + money(a.target) + '</td><td>' + (a.hit ? '<span class="ok">hit</span>' : 'wait') + '</td><td><button type="button" data-i="' + i + '">x</button></td>';
+				tr.querySelector('button').addEventListener('click', () => {
+					state.data.alerts.splice(i, 1);
+					saveState();
+					renderAlerts();
+				});
+				$('alertBody').appendChild(tr);
+			});
+		}
+
+		function addAlert() {
+			const item = $('alertItem').value.trim();
+			const city = $('alertCity').value.trim();
+			const cond = $('alertCond').value;
+			const target = Math.max(1, parseInt($('alertTarget').value, 10) || 1);
+			if (!item || !city) {
+				setStatus('alertStatus', 'Fill item and city.', true);
+				return;
+			}
+			state.data.alerts.push({ item, city, cond, target, hit: false });
+			saveState();
+			renderAlerts();
+			setStatus('alertStatus', 'Alert added.');
+		}
+
+		async function runAlerts() {
+			if (!state.data.alerts.length) {
+				setStatus('alertStatus', 'No alerts yet.', true);
+				return;
+			}
+			let hits = 0;
+			for (const a of state.data.alerts) {
+				try {
+					const rows = await fetchPrices(a.item, [a.city]);
+					const row = rows.find(x => x.city === a.city) || {};
+					const sellMin = row.sell_price_min || 0;
+					const buyMax = row.buy_price_max || 0;
+					const hit = a.cond === 'lte' ? (sellMin > 0 && sellMin <= a.target) : (buyMax >= a.target);
+					a.hit = hit;
+					if (hit) {
+						hits++;
+						if ('Notification' in window && Notification.permission === 'granted') {
+							new Notification('Albion alert hit', { body: a.item + ' in ' + a.city });
+						}
+					}
+				} catch (_) {}
+			}
+			saveState();
+			renderAlerts();
+			setStatus('alertStatus', hits ? 'Hits: ' + hits : 'No alert hits now.');
+		}
+
+		async function enableNotifications() {
+			if (!('Notification' in window)) {
+				setStatus('alertStatus', 'Notifications unsupported.', true);
+				return;
+			}
+			const p = await Notification.requestPermission();
+			setStatus('alertStatus', 'Notification permission: ' + p + '.');
+		}
+
+		function parseLines(text) {
+			return text.split('\n').map(x => x.trim()).filter(Boolean).map(line => {
+				const [id, qtyRaw] = line.split(/\s+/);
+				return { id, qty: Math.max(1, parseInt(qtyRaw || '1', 10) || 1) };
+			});
+		}
+
+		async function calcCraft() {
+			const mats = parseLines($('craftMats').value);
+			const prod = parseLines($('craftProd').value);
+			const city = $('craftCity').value;
+			if (!mats.length || !prod.length) {
+				setStatus('craftStatus', 'Fill materials and products.', true);
+				return;
+			}
+			setStatus('craftStatus', 'Calculating...');
+			try {
+				const ids = [...new Set([...mats, ...prod].map(x => x.id))].join(',');
+				const q = $('quality').value;
+				const url = api('/api/v2/stats/prices/' + encodeURIComponent(ids) + '.json?locations=' + encodeURIComponent(city) + '&qualities=' + q);
+				const res = await fetch(url);
+				if (!res.ok) throw new Error();
+				const data = await res.json();
+				const map = {};
+				data.forEach(r => { if (r.city === city) map[r.item_id] = r; });
+				let cost = 0;
+				let rev = 0;
+				const lines = [];
+				mats.forEach(m => {
+					const sub = (netBuy(map[m.id]?.sell_price_min || 0) || 0) * m.qty;
+					cost += sub;
+					lines.push('- ' + m.id + ' x' + m.qty + ': ' + money(sub));
+				});
+				prod.forEach(p => {
+					const sub = (netSell(map[p.id]?.buy_price_max || 0) || 0) * p.qty;
+					rev += sub;
+					lines.push('+ ' + p.id + ' x' + p.qty + ': ' + money(sub));
+				});
+				const profit = rev - cost;
+				const cls = profit >= 0 ? 'ok' : 'bad';
+				$('craftOut').innerHTML = lines.join('<br>') + '<hr style="margin:8px 0;border:0;border-top:1px solid var(--line)">Cost: <strong>' + money(cost) + '</strong> | Revenue: <strong>' + money(rev) + '</strong><br>Profit: <strong class="' + cls + '">' + money(profit) + '</strong>';
+				setStatus('craftStatus', 'Craft result ready.');
+			} catch (_) {
+				setStatus('craftStatus', 'Craft API error.', true);
+			}
+		}
+
+		function refineRate(tier, spec, bonus, focus) {
+			let r = REFINE_BASE[tier] || 0.15;
+			r += spec * 0.0025;
+			if (bonus) r *= 1.18;
+			if (focus) r += r * 0.4;
+			return Math.min(r, 0.85);
+		}
+
+		function refineOutput(amount, rate) {
+			let remain = amount;
+			let out = 0;
+			while (remain > 0) {
+				out += remain;
+				remain = Math.floor(remain * rate);
+			}
+			return out;
+		}
+
+		function refineIds() {
+			const type = $('refineType').value;
+			const tier = parseInt($('refineTier').value, 10);
+			const pair = REFINE_ITEMS[type];
+			return { rawId: 'T' + tier + '_' + pair.raw, refId: 'T' + tier + '_' + pair.ref, tier };
+		}
+
+		async function calcRefine() {
+			const city = $('refineCity').value;
+			const amount = Math.max(1, parseInt($('refineAmount').value, 10) || 1);
+			const spec = Math.max(0, Math.min(100, parseInt($('refineSpec').value, 10) || 0));
+			const focus = $('refineFocus').checked;
+			const bonus = $('refineBonus').checked;
+			const ids = refineIds();
+			setStatus('refineStatus', 'Calculating...');
+			try {
+				const res = await fetch(api('/api/v2/stats/prices/' + ids.rawId + ',' + ids.refId + '.json?locations=' + encodeURIComponent(city) + '&qualities=1'));
+				if (!res.ok) throw new Error();
+				const data = await res.json();
+				const map = {};
+				data.forEach(r => { if (r.city === city) map[r.item_id] = r; });
+				const buyRaw = map[ids.rawId]?.sell_price_min || 0;
+				const sellRef = map[ids.refId]?.buy_price_max || 0;
+				if (!buyRaw || !sellRef) throw new Error();
+				const rr = refineRate(ids.tier, spec, bonus, focus);
+				const outQty = refineOutput(amount, rr);
+				const cost = (netBuy(buyRaw) || 0) * amount;
+				const rev = (netSell(sellRef) || 0) * outQty;
+				const p = rev - cost;
+				const cls = p >= 0 ? 'ok' : 'bad';
+				$('refineOut').innerHTML = 'Return: <strong>' + (rr * 100).toFixed(1) + '%</strong><br>Input: ' + money(amount) + ' ' + ids.rawId + '<br>Output: ' + money(outQty) + ' ' + ids.refId + '<br>Cost: ' + money(cost) + ' | Revenue: ' + money(rev) + '<br>Profit: <strong class="' + cls + '">' + money(p) + '</strong>';
+				setStatus('refineStatus', 'Refine result ready.');
+			} catch (_) {
+				setStatus('refineStatus', 'Refine API error or no prices.', true);
+			}
+		}
+
+		async function compareRefineCities() {
+			const cities = ['Caerleon', 'Martlock', 'Thetford', 'Fort Sterling', 'Lymhurst', 'Bridgewatch'];
+			const amount = Math.max(1, parseInt($('refineAmount').value, 10) || 1);
+			const spec = Math.max(0, Math.min(100, parseInt($('refineSpec').value, 10) || 0));
+			const focus = $('refineFocus').checked;
+			const bonus = $('refineBonus').checked;
+			const ids = refineIds();
+			$('refineCompareBody').innerHTML = '';
+			setStatus('refineCompareStatus', 'Comparing cities...');
+			try {
+				const url = api('/api/v2/stats/prices/' + ids.rawId + ',' + ids.refId + '.json?locations=' + encodeURIComponent(cities.join(',')) + '&qualities=1');
+				const res = await fetch(url);
+				if (!res.ok) throw new Error();
+				const data = await res.json();
+				const byCity = {};
+				data.forEach(r => {
+					if (!byCity[r.city]) byCity[r.city] = {};
+					byCity[r.city][r.item_id] = r;
+				});
+				const rr = refineRate(ids.tier, spec, bonus, focus);
+				const outQty = refineOutput(amount, rr);
+				const out = [];
+				cities.forEach(c => {
+					const buyRaw = byCity[c]?.[ids.rawId]?.sell_price_min || 0;
+					const sellRef = byCity[c]?.[ids.refId]?.buy_price_max || 0;
+					if (!buyRaw || !sellRef) return;
+					const cost = (netBuy(buyRaw) || 0) * amount;
+					const rev = (netSell(sellRef) || 0) * outQty;
+					out.push({ c, cost, rev, p: rev - cost });
+				});
+				out.sort((a, b) => b.p - a.p);
+				out.forEach(x => {
+					const tr = document.createElement('tr');
+					const cls = x.p >= 0 ? 'ok' : 'bad';
+					tr.innerHTML = '<td>' + x.c + '</td><td class="num">' + money(x.cost) + '</td><td class="num">' + money(x.rev) + '</td><td class="num ' + cls + '">' + money(x.p) + '</td>';
+					$('refineCompareBody').appendChild(tr);
+				});
+				setStatus('refineCompareStatus', out.length ? 'Best city: ' + out[0].c : 'No city data.', !out.length);
+			} catch (_) {
+				setStatus('refineCompareStatus', 'Compare API error.', true);
+			}
+		}
+
+		function riskMult(risk) { return risk === 'low' ? 0.78 : risk === 'high' ? 1.32 : 1; }
+		function goalBase(goal) { return { silver: 860000, pvp: 1120000, pve: 710000, gather: 910000, craft: 980000 }[goal] || 800000; }
+		function tierMult(tier) { return 0.7 + Number(tier) * 0.08; }
+
+		function renderPlanner() {
+			const goal = $('goal').value;
+			const budget = parseInt($('budget').value, 10) || 0;
+			const minutes = parseInt($('minutes').value, 10) || 60;
+			const risk = $('risk').value;
+			const tier = $('tier').value;
+			const premium = $('premium').checked;
+			const hour = goalBase(goal) * riskMult(risk) * tierMult(tier) * (premium ? 1.08 : 0.95);
+			const session = hour * (minutes / 60);
+			const safety = Math.min(180, Math.max(20, Math.round((budget / (session + 1)) * 100)));
+			const cls = risk === 'low' ? 'ok' : risk === 'high' ? 'bad' : 'warn';
+			$('planKpis').innerHTML = '<div class="kpi"><span class="v">' + money(hour) + '</span>Silver/hour</div><div class="kpi"><span class="v">' + money(session) + '</span>Session</div><div class="kpi"><span class="v">' + safety + '%</span>Budget safety</div>';
+			const p = planTemplates[goal];
+			$('planOutput').innerHTML = '<strong>' + p.title + '</strong><br>Route: ' + p.route + '<br>Build: ' + p.build + '<br>Checklist: ' + p.checklist + '<br>Risk: <span class="' + cls + '">' + risk + '</span>, Tier: T' + tier;
+			state.data.planner = { goal, budget, minutes, risk, tier };
+			saveState();
+		}
+
+		function renderWeekPlan() {
+			const t = Math.max(1, parseInt($('weekTarget').value, 10) || 1);
+			const c = Math.max(0, parseInt($('weekCurrent').value, 10) || 0);
+			const h = Math.max(0.5, parseFloat($('weekHoursDay').value) || 1);
+			const left = Math.max(0, t - c);
+			const perDay = Math.round(left / 7);
+			const perHourNeed = Math.round(perDay / h);
+			const recentAvg = state.data.farm.length
+				? Math.round(state.data.farm.reduce((s, x) => s + (x.minutes > 0 ? (x.silver / x.minutes * 60) : 0), 0) / state.data.farm.length)
+				: 0;
+			const cls = recentAvg >= perHourNeed ? 'ok' : 'warn';
+			$('weekOut').innerHTML = 'Left: <strong>' + money(left) + '</strong><br>Need per day: <strong>' + money(perDay) + '</strong><br>Need per hour: <strong>' + money(perHourNeed) + '</strong><br>Your recent avg/h: <strong class="' + cls + '">' + money(recentAvg) + '</strong>';
+			state.data.weekGoal = { target: t, current: c, hoursDay: h };
+			saveState();
+		}
+
+		function renderIsland() {
+			$('islandBody').innerHTML = '';
+			const now = Date.now();
+			state.data.island.forEach((x, i) => {
+				const ready = x.start + x.hours * 3600000;
+				const left = ready - now;
+				const txt = left <= 0 ? 'Ready' : Math.floor(left / 3600000) + 'h ' + Math.floor((left % 3600000) / 60000) + 'm';
+				const cls = left <= 0 ? 'ok' : left < 3600000 ? 'warn' : '';
+				const tr = document.createElement('tr');
+				tr.innerHTML = '<td>' + x.name + '</td><td>' + new Date(ready).toLocaleString('uk-UA', { day: '2-digit', month: '2-digit', hour: '2-digit', minute: '2-digit' }) + '</td><td class="' + cls + '">' + txt + '</td><td><button type="button" data-i="' + i + '">x</button></td>';
+				tr.querySelector('button').addEventListener('click', () => {
+					state.data.island.splice(i, 1);
+					saveState();
+					renderIsland();
+				});
+				$('islandBody').appendChild(tr);
+			});
+		}
+
+		function addIsland() {
+			const name = $('islandName').value.trim() || 'Timer';
+			const hours = Math.max(1, parseFloat($('islandHours').value) || 22);
+			const start = $('islandStart').value ? new Date($('islandStart').value).getTime() : Date.now();
+			state.data.island.push({ name, hours, start });
+			saveState();
+			$('islandName').value = '';
+			setStatus('islandStatus', 'Timer added.');
+			renderIsland();
+		}
+
+		function renderFarm() {
+			$('farmBody').innerHTML = '';
+			let totalS = 0;
+			let totalM = 0;
+			state.data.farm.forEach((x, i) => {
+				totalS += x.silver;
+				totalM += x.minutes;
+				const ph = x.minutes > 0 ? Math.round(x.silver / x.minutes * 60) : 0;
+				const tr = document.createElement('tr');
+				tr.innerHTML = '<td>' + new Date(x.ts).toLocaleString('uk-UA', { day: '2-digit', month: '2-digit', hour: '2-digit', minute: '2-digit' }) + '</td><td>' + x.name + '</td><td class="num">' + money(x.silver) + '</td><td class="num ok">' + money(ph) + '</td><td><button type="button" data-i="' + i + '">x</button></td>';
+				tr.querySelector('button').addEventListener('click', () => {
+					state.data.farm.splice(i, 1);
+					saveState();
+					renderFarm();
+					renderWeekPlan();
+				});
+				$('farmBody').appendChild(tr);
+			});
+			const avg = totalM > 0 ? Math.round(totalS / totalM * 60) : 0;
+			$('farmKpi').innerHTML = '<div class="kpi"><span class="v">' + money(totalS) + '</span>Total</div><div class="kpi"><span class="v">' + (Math.round(totalM / 6) / 10) + '</span>Hours</div><div class="kpi"><span class="v">' + money(avg) + '</span>Avg/h</div>';
+		}
+
+		function addFarm() {
+			const name = $('farmName').value.trim() || 'Farm';
+			const silver = Math.max(0, parseInt($('farmSilver').value, 10) || 0);
+			const minutes = Math.max(1, parseInt($('farmMinutes').value, 10) || 60);
+			state.data.farm.unshift({ name, silver, minutes, ts: Date.now() });
+			state.data.farm = state.data.farm.slice(0, 400);
+			saveState();
+			$('farmName').value = '';
+			renderFarm();
+			renderWeekPlan();
+		}
+
+		function renderPvp() {
+			const total = state.data.pvp.length;
+			const wins = state.data.pvp.filter(x => x.result === 'win').length;
+			const losses = total - wins;
+			const wr = total > 0 ? Math.round(wins / total * 100) : 0;
+			const net = state.data.pvp.reduce((s, x) => s + x.loot - x.loss, 0);
+			const cls = net >= 0 ? 'ok' : 'bad';
+			$('pvpKpi').innerHTML = '<div class="kpi"><span class="v">' + total + '</span>Fights</div><div class="kpi"><span class="v">' + wr + '%</span>Winrate</div><div class="kpi"><span class="v ' + cls + '">' + money(net) + '</span>Net</div><div class="kpi"><span class="v">' + wins + '/' + losses + '</span>W/L</div>';
+		}
+
+		function addPvp() {
+			const result = $('pvpResult').value;
+			const loot = Math.max(0, parseInt($('pvpLoot').value, 10) || 0);
+			const loss = Math.max(0, parseInt($('pvpLoss').value, 10) || 0);
+			state.data.pvp.unshift({ result, loot, loss, ts: Date.now() });
+			state.data.pvp = state.data.pvp.slice(0, 400);
+			saveState();
+			renderPvp();
+		}
+
+		function fameForLevel(level, cat) {
+			if (level >= 100) return 0;
+			const base = cat === 'gather' ? 45 : cat === 'craft' ? 38 : 120;
+			const growth = cat === 'gather' ? 1.115 : cat === 'craft' ? 1.118 : 1.122;
+			return Math.floor(base * Math.pow(growth, Math.max(0, level - 1)));
+		}
+
+		function renderSpecs() {
+			$('specBody').innerHTML = '';
+			state.data.specs.forEach((s, i) => {
+				let left = 0;
+				for (let l = s.level; l < 100; l++) left += fameForLevel(l, s.cat);
+				left -= s.fame;
+				if (left < 0) left = 0;
+				const tr = document.createElement('tr');
+				tr.innerHTML = '<td>' + s.name + '</td><td>' + s.cat + '</td><td class="num">' + s.level + '</td><td class="num">' + money(left) + '</td><td><button type="button" data-i="' + i + '">x</button></td>';
+				tr.querySelector('button').addEventListener('click', () => {
+					state.data.specs.splice(i, 1);
+					saveState();
+					renderSpecs();
+				});
+				$('specBody').appendChild(tr);
+			});
+		}
+
+		function addSpec() {
+			const name = $('specName').value.trim();
+			if (!name) return;
+			const cat = $('specCat').value;
+			const level = Math.max(0, Math.min(100, parseInt($('specLevel').value, 10) || 0));
+			const fame = Math.max(0, parseInt($('specFame').value, 10) || 0);
+			const idx = state.data.specs.findIndex(x => x.name === name && x.cat === cat);
+			const obj = { name, cat, level, fame };
+			if (idx >= 0) state.data.specs[idx] = obj;
+			else state.data.specs.push(obj);
+			saveState();
+			$('specName').value = '';
+			renderSpecs();
+		}
+
+		function renderPortfolio() {
+			$('portBody').innerHTML = '';
+			state.data.portfolio.forEach((x, i) => {
+				const now = x.lastPrice || 0;
+				const pnl = x.qty * (now - x.entry);
+				const cls = pnl >= 0 ? 'ok' : 'bad';
+				const tr = document.createElement('tr');
+				tr.innerHTML = '<td>' + x.item + ' <span class="tiny">' + x.city + '</span></td><td class="num">' + x.qty + '</td><td class="num">' + money(x.entry) + '</td><td class="num">' + (now ? money(now) : '-') + '</td><td class="num ' + cls + '">' + money(pnl) + '</td><td><button type="button" data-i="' + i + '">x</button></td>';
+				tr.querySelector('button').addEventListener('click', () => {
+					state.data.portfolio.splice(i, 1);
+					saveState();
+					renderPortfolio();
+				});
+				$('portBody').appendChild(tr);
+			});
+		}
+
+		function addPortfolio() {
+			const item = $('portItem').value.trim();
+			const qty = Math.max(1, parseInt($('portQty').value, 10) || 1);
+			const entry = Math.max(0, parseInt($('portEntry').value, 10) || 0);
+			const city = $('portCity').value.trim() || 'Caerleon';
+			if (!item) {
+				setStatus('portStatus', 'Enter item ID.', true);
+				return;
+			}
+			state.data.portfolio.push({ item, qty, entry, city, lastPrice: 0 });
+			saveState();
+			renderPortfolio();
+			setStatus('portStatus', 'Holding added.');
+		}
+
+		async function refreshPortfolio() {
+			if (!state.data.portfolio.length) return;
+			setStatus('portStatus', 'Refreshing portfolio...');
+			for (const p of state.data.portfolio) {
+				try {
+					const rows = await fetchPrices(p.item, [p.city]);
+					const row = rows.find(x => x.city === p.city) || {};
+					p.lastPrice = row.buy_price_max || row.sell_price_min || 0;
+				} catch (_) {}
+			}
+			saveState();
+			renderPortfolio();
+			setStatus('portStatus', 'Portfolio refreshed.');
+		}
+
+		async function calcRoute() {
+			const item = $('routeItem').value.trim();
+			const qty = Math.max(1, parseInt($('routeQty').value, 10) || 1);
+			const from = $('routeFrom').value.trim();
+			const to = $('routeTo').value.trim();
+			const riskPct = Math.max(0, Math.min(100, parseFloat($('routeRisk').value) || 0));
+			const mins = Math.max(1, parseFloat($('routeMin').value) || 1);
+			if (!item || !from || !to) {
+				$('routeOut').textContent = 'Fill item/from/to.';
+				return;
+			}
+			$('routeOut').textContent = 'Calculating route...';
+			try {
+				const rows = await fetchPrices(item, [from, to]);
+				const fromRow = rows.find(x => x.city === from) || {};
+				const toRow = rows.find(x => x.city === to) || {};
+				const buy = netBuy(fromRow.sell_price_min || 0) || 0;
+				const sell = netSell(toRow.buy_price_max || 0) || 0;
+				const gross = (sell - buy) * qty;
+				const riskAdj = Math.round(gross * (1 - riskPct / 100));
+				const perHour = Math.round(riskAdj * (60 / mins));
+				const cls = riskAdj >= 0 ? 'ok' : 'bad';
+				$('routeOut').innerHTML = 'Buy each: ' + money(buy) + '<br>Sell each: ' + money(sell) + '<br>Gross/run: ' + money(gross) + '<br>Risk-adjusted: <strong class="' + cls + '">' + money(riskAdj) + '</strong><br>Adj per hour: <strong class="' + cls + '">' + money(perHour) + '</strong>';
+			} catch (_) {
+				$('routeOut').textContent = 'Route API error.';
+			}
+		}
+
+		function renderBuilds() {
+			$('buildBody').innerHTML = '';
+			state.data.builds.forEach((b, i) => {
+				const tr = document.createElement('tr');
+				tr.innerHTML = '<td>' + b.name + '</td><td>' + b.tag + '</td><td class="tiny">' + (b.text || '').replace(/\n/g, ' | ') + '</td><td><button type="button" data-i="' + i + '">x</button></td>';
+				tr.querySelector('button').addEventListener('click', () => {
+					state.data.builds.splice(i, 1);
+					saveState();
+					renderBuilds();
+				});
+				$('buildBody').appendChild(tr);
+			});
+		}
+
+		function addBuild() {
+			const name = $('buildName').value.trim();
+			const tag = $('buildTag').value;
+			const text = $('buildText').value.trim();
+			if (!name || !text) return;
+			state.data.builds.unshift({ name, tag, text, ts: Date.now() });
+			state.data.builds = state.data.builds.slice(0, 100);
+			saveState();
+			$('buildName').value = '';
+			$('buildText').value = '';
+			renderBuilds();
+		}
+
+		function saveNotes() {
+			state.data.notes = $('notes').value;
+			saveState();
+			setStatus('notesStatus', 'Notes saved.');
+		}
+
+		function doExport() {
+			$('dataJson').value = JSON.stringify(state.data, null, 2);
+			setStatus('dataStatus', 'Export ready.');
+		}
+
+		function doImport() {
+			try {
+				const parsed = JSON.parse($('dataJson').value);
+				state.data = {
+					...state.data,
+					...parsed,
+					settings: { ...state.data.settings, ...(parsed.settings || {}) },
+					planner: { ...state.data.planner, ...(parsed.planner || {}) },
+					weekGoal: { ...state.data.weekGoal, ...(parsed.weekGoal || {}) }
+				};
+				saveState();
+				loadUiFromState();
+				renderAll();
+				setStatus('dataStatus', 'Import complete.');
+			} catch (_) {
+				setStatus('dataStatus', 'Invalid JSON.', true);
+			}
+		}
+
+		function doBackupNow() {
+			const snap = { ts: Date.now(), data: JSON.parse(JSON.stringify(state.data)) };
+			state.data.backups.unshift(snap);
+			state.data.backups = state.data.backups.slice(0, 20);
+			saveState();
+			setStatus('backupStatus', 'Backup saved: ' + new Date(snap.ts).toLocaleString('uk-UA'));
+		}
+
+		function downloadLatestBackup() {
+			if (!state.data.backups.length) {
+				setStatus('backupStatus', 'No backups.', true);
+				return;
+			}
+			const latest = state.data.backups[0];
+			const blob = new Blob([JSON.stringify(latest.data, null, 2)], { type: 'application/json' });
+			const a = document.createElement('a');
+			a.href = URL.createObjectURL(blob);
+			a.download = 'albion-backup-' + new Date(latest.ts).toISOString().slice(0, 19).replace(/[:T]/g, '-') + '.json';
+			a.click();
+			URL.revokeObjectURL(a.href);
+			setStatus('backupStatus', 'Backup downloaded.');
+		}
+
+		function setupAutoBackup() {
+			if (state.backupTimer) {
+				clearInterval(state.backupTimer);
+				state.backupTimer = null;
+			}
+			if (!$('backupOn').checked) return;
+			const min = Math.max(1, parseInt($('backupMin').value, 10) || 15);
+			state.backupTimer = setInterval(doBackupNow, min * 60000);
+		}
+
+		function generateShareLink() {
+			try {
+				const payload = btoa(unescape(encodeURIComponent(JSON.stringify(state.data))));
+				const url = location.origin + location.pathname + '#share=' + payload;
+				$('shareLink').value = url;
+				setStatus('notesStatus', 'Share link generated.');
+			} catch (_) {
+				setStatus('notesStatus', 'Could not generate share link.', true);
+			}
+		}
+
+		function loadShareFromHash() {
+			if (!location.hash.startsWith('#share=')) return;
+			try {
+				const payload = location.hash.slice(7);
+				const parsed = JSON.parse(decodeURIComponent(escape(atob(payload))));
+				state.data = {
+					...state.data,
+					...parsed,
+					settings: { ...state.data.settings, ...(parsed.settings || {}) }
+				};
+				saveState();
+			} catch (_) {}
+		}
+
+		function setupAutoRefresh() {
+			if (state.refreshTimer) {
+				clearInterval(state.refreshTimer);
+				state.refreshTimer = null;
+			}
+			if (!$('autoRefresh').checked) return;
+			const sec = Math.max(10, parseInt($('refreshSec').value, 10) || 30);
+			state.refreshTimer = setInterval(() => {
+				if ($('panel-market').classList.contains('active') && state.currentItem) loadOneItem();
+			}, sec * 1000);
+		}
+
+		function setupAlertAutoCheck() {
+			if (state.alertTimer) clearInterval(state.alertTimer);
+			state.alertTimer = setInterval(runAlerts, 120000);
+		}
+
+		function saveSettingsFromUi() {
+			state.data.settings = {
+				region: $('region').value,
+				quality: $('quality').value,
+				premium: $('premium').checked,
+				autoRefresh: $('autoRefresh').checked,
+				refreshSec: $('refreshSec').value,
+				lang: $('lang').value,
+				backupOn: $('backupOn').checked,
+				backupMin: $('backupMin').value
+			};
+			saveState();
+			applyLanguage();
+			setupAutoRefresh();
+			setupAutoBackup();
+		}
+
+		function loadUiFromState() {
+			const s = state.data.settings || {};
+			$('region').value = s.region || 'europe';
+			$('quality').value = s.quality || '1';
+			$('premium').checked = !!s.premium;
+			$('autoRefresh').checked = !!s.autoRefresh;
+			$('refreshSec').value = s.refreshSec || '30';
+			$('lang').value = s.lang || 'uk';
+			$('backupOn').checked = !!s.backupOn;
+			$('backupMin').value = s.backupMin || '15';
+
+			const p = state.data.planner || {};
+			$('goal').value = p.goal || 'silver';
+			$('budget').value = p.budget || 500000;
+			$('minutes').value = p.minutes || 90;
+			$('risk').value = p.risk || 'mid';
+			$('tier').value = p.tier || '5';
+
+			const w = state.data.weekGoal || {};
+			$('weekTarget').value = w.target || 10000000;
+			$('weekCurrent').value = w.current || 0;
+			$('weekHoursDay').value = w.hoursDay || 2;
+
+			$('notes').value = state.data.notes || '';
+			$('islandStart').value = nowIsoLocal();
+		}
+
+		async function refreshPortfolioOnInit() {
+			if (state.data.portfolio.length) {
+				await refreshPortfolio();
+			}
+		}
+
+		function registerPwaSupport() {
+			window.addEventListener('beforeinstallprompt', e => {
+				e.preventDefault();
+				state.deferredInstallPrompt = e;
+			});
+
+			if ('serviceWorker' in navigator && location.protocol.startsWith('http')) {
+				const swCode = `
+					const CACHE = 'albion-mega-cache-v1';
+					self.addEventListener('install', e => {
+						e.waitUntil(caches.open(CACHE).then(c => c.addAll(['./'])));
+					});
+					self.addEventListener('fetch', e => {
+						e.respondWith(fetch(e.request).catch(() => caches.match(e.request).then(r => r || caches.match('./'))));
+					});
+				`;
+				const blob = new Blob([swCode], { type: 'text/javascript' });
+				const url = URL.createObjectURL(blob);
+				navigator.serviceWorker.register(url).catch(() => {});
+			}
+		}
+
+		async function installPwa() {
+			if (!state.deferredInstallPrompt) {
+				setStatus('dataStatus', 'Install prompt unavailable in this context.', true);
+				return;
+			}
+			state.deferredInstallPrompt.prompt();
+			const res = await state.deferredInstallPrompt.userChoice;
+			state.deferredInstallPrompt = null;
+			setStatus('dataStatus', 'Install choice: ' + res.outcome + '.');
+		}
+
+		function bindTabs() {
+			document.querySelectorAll('.tab').forEach(btn => {
+				btn.addEventListener('click', () => {
+					document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+					document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
+					btn.classList.add('active');
+					$('panel-' + btn.dataset.panel).classList.add('active');
+				});
+			});
+		}
+
+		function bindEvents() {
+			['region', 'quality', 'premium', 'autoRefresh', 'refreshSec', 'lang', 'backupOn', 'backupMin'].forEach(id => {
+				$(id).addEventListener('change', () => {
+					saveSettingsFromUi();
+					checkOnline();
+				});
+			});
+
+			$('btnPlan').addEventListener('click', renderPlanner);
+			$('btnWeekPlan').addEventListener('click', renderWeekPlan);
+			$('btnLoadPrice').addEventListener('click', loadOneItem);
+			$('btnFav').addEventListener('click', addFavorite);
+			$('btnScanArb').addEventListener('click', scanArb);
+			$('btnAddAlert').addEventListener('click', addAlert);
+			$('btnRunAlerts').addEventListener('click', runAlerts);
+			$('btnNotif').addEventListener('click', enableNotifications);
+			$('btnCraft').addEventListener('click', calcCraft);
+			$('btnRefine').addEventListener('click', calcRefine);
+			$('btnRefineCompare').addEventListener('click', compareRefineCities);
+			$('btnIslandAdd').addEventListener('click', addIsland);
+			$('btnFarmAdd').addEventListener('click', addFarm);
+			$('btnPvpAdd').addEventListener('click', addPvp);
+			$('btnSpecAdd').addEventListener('click', addSpec);
+			$('btnPortAdd').addEventListener('click', addPortfolio);
+			$('btnPortRefresh').addEventListener('click', refreshPortfolio);
+			$('btnRouteCalc').addEventListener('click', calcRoute);
+			$('btnBuildSave').addEventListener('click', addBuild);
+			$('btnSaveNotes').addEventListener('click', saveNotes);
+			$('btnShareLink').addEventListener('click', generateShareLink);
+			$('btnBackupNow').addEventListener('click', doBackupNow);
+			$('btnDownloadBackup').addEventListener('click', downloadLatestBackup);
+			$('btnExport').addEventListener('click', doExport);
+			$('btnImport').addEventListener('click', doImport);
+			$('btnApiHealth').addEventListener('click', checkApiHealth);
+			$('btnInstallPwa').addEventListener('click', installPwa);
+		}
+
+		function renderAll() {
+			applyLanguage();
+			renderPlanner();
+			renderWeekPlan();
+			renderFavorites();
+			renderAlerts();
+			renderIsland();
+			renderFarm();
+			renderPvp();
+			renderSpecs();
+			renderPortfolio();
+			renderBuilds();
+		}
+
+		async function init() {
+			loadState();
+			loadShareFromHash();
+			loadUiFromState();
+			bindTabs();
+			bindEvents();
+			renderAll();
+			setupAutoRefresh();
+			setupAlertAutoCheck();
+			setupAutoBackup();
+			registerPwaSupport();
+			await Promise.all([checkOnline(), loadCatalog(), refreshPortfolioOnInit()]);
+			setInterval(() => {
+				if ($('panel-progress').classList.contains('active')) renderIsland();
+			}, 60000);
+		}
+
+		init();
+	</script>
+</body>
+</html>
